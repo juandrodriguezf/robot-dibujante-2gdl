@@ -20,6 +20,7 @@ clc;
 close all;
 
 aqui = fileparts(mfilename('fullpath'));
+addpath(aqui);
 addpath(fullfile(aqui, '..', 'lib'));
 addpath(fullfile(aqui, '..', 'cinematica'));
 add_rvc_path();
@@ -171,6 +172,17 @@ legend({'q_1', 'q_2'}, 'Location', 'best');
 estilizar(f2);
 print(f2, '-depsc2', '-r300', fullfile(figdir, 'trayectoria_articular.eps'));
 fprintf('Figura guardada: trayectoria_articular.eps\n');
+
+% Figura 3: simulacion con el modelo CAD real (mallas de SolidWorks)
+f3 = figure('Color', 'w', 'Position', [60 60 1100 820]);
+ax3 = axes(f3);
+G = plotter_cad('crear', ax3, q(round(M/2),:));
+hold(ax3, 'on');
+plot3(ax3, r(1,:), r(2,:), 0.001*ones(1,M), '-', 'Color', [0.85 0.10 0.10], 'LineWidth', 2.5);
+title(ax3, 'Simulacion con el modelo CAD');
+estilizar(f3);
+print(f3, '-depsc2', '-r300', fullfile(figdir, 'trayectoria_cad.eps'));
+fprintf('Figura guardada: trayectoria_cad.eps\n');
 
 fprintf('\ntrayectoria_test.m: completado.\n');
 

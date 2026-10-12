@@ -178,8 +178,10 @@ Los componentes necesarios para el robot se muestran en la tabla \ref{tab:compos
 El robot es un manipulador plano de 2 grados de libertad (2R): ambas
 articulaciones son rotacionales ($\sigma_i = 0$) con ejes $z$ paralelos y
 perpendiculares al plano de dibujo. La tabla \ref{tab:dh} resume los parámetros
-de Denavit-Hartenberg en la convención estándar; las longitudes $L_1 = 0.200$ m
-y $L_2 = 0.100$ m se tomaron del modelo CAD (de centro de eje a centro de eje).
+de Denavit-Hartenberg en la convención estándar; las longitudes $L_1 = 0.200$ m,
+$L_2 = 0.100$ m y las cotas verticales $d_1$, $d_2$ se tomaron del modelo CAD
+(de centro de eje a centro de eje). El marco mundo $\{W\}$ está sobre el papel y
+$\{W\}\to\{0\} = \mathrm{trasl}(0,0,h_0)$ con $h_0 = 0.0485$ m.
 
 \begin{table}[H]
     \centering
@@ -189,8 +191,8 @@ y $L_2 = 0.100$ m se tomaron del modelo CAD (de centro de eje a centro de eje).
     \toprule
     Eslabón & $\theta_i^{off}$ [rad] & $d_i$ [m] & $a_i$ [m] & $\alpha_i$ [rad] & $\sigma_i$ \\
     \midrule
-    1 & 0 & $d_1 = 0$     & $L_1 = 0.200$ & 0 & 0 \\
-    2 & 0 & 0             & $L_2 = 0.100$ & 0 & 0 \\
+    1 & 0 & $d_1 = 0.0200$  & $L_1 = 0.200$ & 0 & 0 \\
+    2 & 0 & $d_2 = -0.0685$ & $L_2 = 0.100$ & 0 & 0 \\
     \bottomrule
     \end{tabular}
 \end{table}
@@ -217,12 +219,14 @@ ${}^{0}_{2}T = {}^{0}_{1}T\,{}^{1}_{2}T$ da la posición del efector final,
 \begin{bmatrix}
 L_1\cos q_1 + L_2\cos(q_1 + q_2) \\
 L_1\sin q_1 + L_2\sin(q_1 + q_2) \\
-d_1
+h_0 + d_1 + d_2
 \end{bmatrix},
 \label{eq:fk}
 \end{equation}
 
-y una orientación que es una rotación $\phi = q_1 + q_2$ sobre el eje $z$. La
+donde $h_0 = 0.0485$ m es la traslación del marco mundo y $d_2$ es negativa, de
+modo que la punta del marcador queda sobre el papel ($z = 0$). La orientación es
+una rotación $\phi = q_1 + q_2$ sobre el eje $z$. La
 función \texttt{forward\_kinematics(DH,q)} implementa la ecuación
 \eqref{eq:dh_mat} de forma genérica para $n$ eslabones: parte de $T = I_4$ y
 acumula $T \leftarrow T \cdot {}^{i-1}_{i}T$ para $i = 1, \dots, n$. Admite un
@@ -417,7 +421,9 @@ con un error máximo de posición de $1.0\times10^{-10}$ m, y la posición
 reconstruida por cinemática directa coincide con $r(t)$ con ese mismo orden de
 error. La figura \ref{fig:tray_cart} muestra las componentes $x(t)$ y $y(t)$ y el
 trazado en el plano; la figura \ref{fig:tray_art} presenta las trayectorias
-articulares $q(t)$, $\dot q(t)$ y $\ddot q(t)$ obtenidas por cinemática inversa.
+articulares $q(t)$, $\dot q(t)$ y $\ddot q(t)$ obtenidas por cinemática inversa;
+la figura \ref{fig:tray_cad} presenta además la simulación con el modelo CAD real
+del robot ejecutando el trazado.
 
 La tabla \ref{tab:tray_lim} resume los máximos articulares. Las velocidades
 máximas ($0.15$ y $0.21$ rad/s) quedan holgadamente por debajo del límite de los
@@ -452,6 +458,14 @@ tres vértices, como exige el requerimiento de continuidad.
     \caption{Trayectorias articulares por cinemática inversa: posición,
     velocidad y aceleración.}
     \label{fig:tray_art}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.62\textwidth]{figuras/trayectoria_cad.eps}
+    \caption{Simulación con el modelo CAD real (mallas de SolidWorks) del robot
+    ejecutando el trazado del triángulo de Reuleaux sobre el papel.}
+    \label{fig:tray_cad}
 \end{figure}
 
 \section{Conclusiones}

@@ -88,6 +88,11 @@ function [q, info] = ikine(robot, T, q_inicial, opts)
     DH = robot.DH;
     n = size(DH, 1);
 
+    base = eye(4);
+    if isfield(robot, 'base') && ~isempty(robot.base)
+        base = robot.base;
+    end
+
     % Numero de puntos de la trayectoria 
     if ndims(T) <= 2
         N = 1;
@@ -136,7 +141,7 @@ function [q, info] = ikine(robot, T, q_inicial, opts)
         for it = 1:opts.max_iter
             iter = it;
 
-            [~, p] = homogenous_matrix(DH, q_act);
+            [~, p] = homogenous_matrix(DH, q_act, base);
             e   = p_objetivo - p(:, n);
             err = norm(e);
 
@@ -177,7 +182,7 @@ function [q, info] = ikine(robot, T, q_inicial, opts)
         end
 
         if ~converged
-            [~, p] = homogenous_matrix(DH, q_act);
+            [~, p] = homogenous_matrix(DH, q_act, base);
             err = norm(p_objetivo - p(:, n));
         end
 

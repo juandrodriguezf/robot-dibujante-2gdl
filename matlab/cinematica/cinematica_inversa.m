@@ -136,7 +136,7 @@ fprintf('  w -> 0 en los limites r = %.2f y r = %.2f m (singularidades)\n', Rmin
 fprintf('\n--- 6. Figuras -------------------------------------------------\n');
 
 % Figura 1: las dos configuraciones para el mismo punto
-f1 = figure('Color', 'w', 'Position', [100 100 760 620]);
+f1 = figure('Color', 'w', 'Position', [100 100 1000 900]);
 hold on; axis equal; grid on; box on;
 ang = linspace(0, 2*pi, 400);
 hMax = plot(Rmax*cos(ang), Rmax*sin(ang), '--', 'Color', [0.8 0.8 0.8], 'LineWidth', 1);
@@ -154,27 +154,29 @@ for b = 1:2
 end
 hStar = plot(p_obj(1), p_obj(2), 'p', 'MarkerSize', 16, 'MarkerFaceColor', [0.1 0.1 0.1], 'MarkerEdgeColor', 'k');
 xlabel('x [m]'); ylabel('y [m]');
-title('Cinematica inversa: dos configuraciones para el mismo punto');
+title({'Cinematica inversa del plotter 2 GdL', ...
+       'Dos configuraciones del mismo punto'});
 legend([hMax hMin hRama(1) hRama(2) hStar], ...
        {'Limite exterior', 'Limite interior', 'Rama A (codo arriba)', ...
         'Rama B (codo abajo)', 'Objetivo'}, 'Location', 'southoutside', ...
-        'Orientation', 'horizontal', 'NumColumns', 3);
+        'Orientation', 'horizontal', 'NumColumns', 2);
 xlim([-Rmax*1.05 Rmax*1.05]);
 estilizar(f1);
 print(f1, '-depsc2', '-r300', fullfile(figdir, 'cinematica_inversa_ramas.eps'));
 fprintf('Figura guardada: cinematica_inversa_ramas.eps\n');
 
 % Figura 2: manipulabilidad frente al radio
-f2 = figure('Color', 'w', 'Position', [100 100 720 460]);
+f2 = figure('Color', 'w', 'Position', [100 100 950 800]);
 hold on; grid on; box on;
-plot(r, w, '-', 'Color', [0.20 0.45 0.95], 'LineWidth', 2.5);
+hCurva = plot(r, w, '-', 'Color', [0.20 0.45 0.95], 'LineWidth', 2.5);
 r_re = 0.20 + [-1 1]*0.10/sqrt(3);
 yl = [0 1.05*max(w)];
-plot(r_re, [yl(2) yl(2)], '-', 'Color', [0.85 0.55 0.15], 'LineWidth', 2);
-text(mean(r_re), yl(2)*0.93, 'Rango radial del triangulo', ...
-     'HorizontalAlignment', 'center', 'FontSize', 9, 'Color', [0.6 0.4 0.1]);
+hRango = plot(r_re, [yl(2) yl(2)], '-', 'Color', [0.85 0.55 0.15], 'LineWidth', 3);
 xlabel('Radio del efector final r [m]'); ylabel('|det J_v| = L_1 L_2 |sin q_2|');
-title('Manipulabilidad frente al radio (singularidad en los limites)');
+title({'Manipulabilidad frente al radio', ...
+       '(singularidad en los limites)'});
+legend([hCurva hRango], {'|det J_v|', 'Rango radial del triangulo'}, ...
+       'Location', 'southoutside', 'Orientation', 'horizontal', 'NumColumns', 2);
 xlim([Rmin Rmax]); ylim(yl);
 estilizar(f2);
 print(f2, '-depsc2', '-r300', fullfile(figdir, 'cinematica_inversa_singularidad.eps'));
@@ -197,12 +199,16 @@ function Q = ik_2r(p, L1, L2)
 end
 
 function estilizar(fig)
-%estilizar  Fondo claro e independiente del tema de MATLAB.
+%estilizar  Fondo claro y fuente >= 26 pt (independiente del tema de MATLAB).
     ax = findall(fig, 'Type', 'axes');
     set(ax, 'Color', 'w', 'XColor', [0 0 0], 'YColor', [0 0 0], ...
-            'GridColor', [0.75 0.75 0.75], 'LineWidth', 1.0);
+            'GridColor', [0.75 0.75 0.75], 'LineWidth', 1.0, 'FontSize', 26);
+    for a = ax'
+        a.Title.FontSize = 26;
+    end
     lg = findobj(fig, 'Type', 'Legend');
     if ~isempty(lg)
-        set(lg, 'Color', 'w', 'TextColor', [0 0 0], 'EdgeColor', [0.7 0.7 0.7]);
+        set(lg, 'Color', 'w', 'TextColor', [0 0 0], 'EdgeColor', [0.7 0.7 0.7], ...
+            'FontSize', 26);
     end
 end

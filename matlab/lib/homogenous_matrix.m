@@ -1,7 +1,7 @@
 % Esta función permite obtener las matrices de rotación y el vector de
 % posición a partir de las matrices homogéneas que definen al robot 
 
-function [r, p] = homogenous_matrix(DH,q)
+function [r, p] = homogenous_matrix(DH,q,base)
 
 n = size(DH, 1);
 q = q(:)';
@@ -10,9 +10,13 @@ if length(q) ~= n
     error('q debe contener un valor por articulación.');
 end
 
+if nargin < 3 || isempty(base)
+    base = eye(4);
+end
+
 r = zeros(3,3,n);
 p = zeros(3,n);
-T = eye(4);
+T = base;
 
 for i = 1:n
     theta_offset = DH(i,1);

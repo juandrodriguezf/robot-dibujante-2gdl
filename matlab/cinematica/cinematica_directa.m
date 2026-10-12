@@ -32,6 +32,8 @@ n  = robot.n;
 L1 = DH(1,3);
 L2 = DH(2,3);
 d1 = DH(1,2);
+d2 = DH(2,2);
+base = robot.base;              % {W} -> {0}
 
 q_test = deg2rad([60 -50]);
 
@@ -48,16 +50,17 @@ fprintf(['Matriz DH generica (convencion estandar):\n' ...
 fprintf('con c_i=cos(q_i+off), s_i=sin(q_i+off), sA=sin(alpha_i), cA=cos(alpha_i).\n');
 fprintf('\nCon alpha_1 = alpha_2 = 0 (robot plano):\n');
 fprintf('  A_1 = [ c1 -s1 0 L1*c1 ; s1 c1 0 L1*s1 ; 0 0 1 d1 ; 0 0 0 1 ]\n');
-fprintf('  A_2 = [ c2 -s2 0 L2*c2 ; s2 c2 0 L2*s2 ; 0 0 1  0 ; 0 0 0 1 ]\n');
-fprintf('\nProducto acumulativo T_0_2 = A_1*A_2:\n');
+fprintf('  A_2 = [ c2 -s2 0 L2*c2 ; s2 c2 0 L2*s2 ; 0 0 1 d2 ; 0 0 0 1 ]\n');
+fprintf('\nProducto acumulativo T_0_2 = A_1*A_2 (marco {0}):\n');
 fprintf('  T_0_2 = [ c12 -s12 0 L1*c1 + L2*c12 ;\n');
 fprintf('            s12  c12 0 L1*s1 + L2*s12 ;\n');
-fprintf('              0    0 1              d1 ;\n');
+fprintf('              0    0 1         d1 + d2 ;\n');
 fprintf('              0    0 0               1 ]\n');
-fprintf('\nCinematica directa (posicion del efector final):\n');
+fprintf('\nMarco mundo {W} -> {0} = trasl(0, 0, %.4f)\n', base(3,4));
+fprintf('Cinematica directa (posicion del efector final en {W}):\n');
 fprintf('  x = L1*cos(q1) + L2*cos(q1 + q2)\n');
 fprintf('  y = L1*sin(q1) + L2*sin(q1 + q2)\n');
-fprintf('  z = d1 = %.4f\n', d1);
+fprintf('  z = 0 m sobre el papel   (h0 + d1 + d2 = %.4f)\n', base(3,4) + d1 + d2);
 
 % Verificacion del producto de matrices frente a forward_kinematics()
 T_prod = dh_matrix(DH(1,:), q_test(1)) * dh_matrix(DH(2,:), q_test(2));
@@ -66,13 +69,14 @@ fprintf('\nmax |A_1*A_2 - forward_kinematics| = %.3e\n', max(abs(T_prod(:) - T_f
 
 % ------------------------------------------------------------------ 2. NUMERICO
 fprintf('\n--- 2. Validacion numerica -------------------------------------\n');
-p_num = T_fk(1:3,4);
+p_num = base * T_fk;
+p_num = p_num(1:3,4);
 fprintf('q_test = [%.4f %.4f] rad (%.0f, %.0f deg)\n', q_test, q_test*180/pi);
 fprintf('FK propia      p = [%.8f %.8f %.8f] m\n', p_num);
 
 p_an = [L1*cos(q_test(1)) + L2*cos(sum(q_test));
         L1*sin(q_test(1)) + L2*sin(sum(q_test));
-        d1];
+        0];
 fprintf('FK analitica   p = [%.8f %.8f %.8f] m\n', p_an);
 fprintf('max |num - analitica| = %.3e m\n', max(abs(p_num - p_an)));
 
@@ -87,8 +91,11 @@ end
 
 fprintf('\nTabla de cinematica directa:\n');
 fprintf('   q1[deg]  q2[deg]      x[m]      y[m]      z[m]\n');
-for qq = deg2rad([0 0; 45 -60; 90 -90; 120 45; -30 120])
-    p = forward_kinematics(DH, qq);
+Qtab = [0 0; 45 -60; 90 -90; 120 45; -30 120];
+for i = 1:size(Qtab,1)
+    qq = deg2rad(Qtab(i,:));
+    p = base * forward_kinematics(DH, qq);
+    p = p(1:3,4);
     fprintf('  %7.1f %8.1f  %8.4f  %8.4f  %8.4f\n', ...
             qq(1)*180/pi, qq(2)*180/pi, p(1), p(2), p(3));
 end
@@ -100,11 +107,11 @@ Rmin = L1 - L2;
 Rmax = L1 + L2;
 
 q_brazo = deg2rad([60 -50]);
-[R, pj] = homogenous_matrix(DH, q_brazo);
+[R, pj] = homogenous_matrix(DH, q_brazo, base);
 p_all = [zeros(3,1), pj];
 r_all = cat(3, eye(3), R);
 
-f = figure('Color', 'w', 'Position', [100 100 720 620]);
+f = figure('Color', 'w', 'Position', [100 100 1000 900]);
 hold on; axis equal; grid on; box on;
 
 ang = linspace(0, 2*pi, 400);
@@ -114,10 +121,10 @@ hmin = plot(Rmin*cos(ang), Rmin*sin(ang), '--', 'Color', [0.75 0.75 0.75], 'Line
 [tx, ty] = reuleaux(0.10, [0 0.20]);
 hreul = plot(tx, ty, '-', 'Color', [0.20 0.60 0.90], 'LineWidth', 1.6);
 
-base  = p_all(:,1);
+base_pt = p_all(:,1);
 codo  = p_all(:,2);
 punta = p_all(:,3);
-hlink = plot([base(1) codo(1)], [base(2) codo(2)], '-', 'Color', [0.10 0.10 0.10], 'LineWidth', 3);
+hlink = plot([base_pt(1) codo(1)], [base_pt(2) codo(2)], '-', 'Color', [0.10 0.10 0.10], 'LineWidth', 3);
 plot([codo(1) punta(1)], [codo(2) punta(2)], '-', 'Color', [0.10 0.10 0.10], 'LineWidth', 3);
 
 esc = 0.03;
@@ -129,24 +136,25 @@ for i = 1:(n+1)
     quiver(o(1), o(2), ya(1)*esc, ya(2)*esc, 0, 'Color', [0.15 0.55 0.15], 'LineWidth', 1.3, 'MaxHeadSize', 3);
 end
 
-plot(base(1), base(2), 'o', 'MarkerSize', 8, 'MarkerFaceColor', [0.1 0.1 0.1], 'MarkerEdgeColor', 'k');
+plot(base_pt(1), base_pt(2), 'o', 'MarkerSize', 8, 'MarkerFaceColor', [0.1 0.1 0.1], 'MarkerEdgeColor', 'k');
 plot(codo(1), codo(2), 'o', 'MarkerSize', 8, 'MarkerFaceColor', [0.1 0.1 0.1], 'MarkerEdgeColor', 'k');
 hpen = plot(punta(1), punta(2), 'o', 'MarkerSize', 9, 'MarkerFaceColor', [0.20 0.60 0.90], 'MarkerEdgeColor', 'k');
 
 xlabel('x [m]'); ylabel('y [m]');
-title('Cinematica directa: marcos DH, brazo y volumen de trabajo');
-legend([hmax hmin hreul hlink hpen], ...
-    {'Limite exterior (R_{max})', 'Limite interior (R_{min})', ...
-     'Triangulo de Reuleaux', 'Eslabones', 'Efector final'}, ...
-    'Location', 'southoutside', 'Orientation', 'horizontal', 'NumColumns', 3);
+title({'Cinematica directa del plotter 2 GdL', ...
+       'Marcos DH y espacio de trabajo'});
+legend([hmax hreul hlink hpen], ...
+    {'Limite de trabajo', 'Triangulo de Reuleaux', 'Eslabones', 'Efector final'}, ...
+    'Location', 'southoutside', 'Orientation', 'horizontal', 'NumColumns', 2);
 xlim([-Rmax*1.05 Rmax*1.05]);
 
-% Fondo claro (independiente del tema de MATLAB) para el informe
+% Fondo claro y fuente >= 24 pt (independiente del tema de MATLAB) para el informe
 ax = gca;
-set(ax, 'Color', 'w', 'XColor', [0 0 0], 'YColor', [0 0 0], 'GridColor', [0.75 0.75 0.75]);
+set(ax, 'Color', 'w', 'XColor', [0 0 0], 'YColor', [0 0 0], 'GridColor', [0.75 0.75 0.75], 'FontSize', 26);
+ax.Title.FontSize = 26;
 lg = findobj(f, 'Type', 'Legend');
 if ~isempty(lg)
-    set(lg, 'Color', 'w', 'TextColor', [0 0 0], 'EdgeColor', [0.7 0.7 0.7]);
+    set(lg, 'Color', 'w', 'TextColor', [0 0 0], 'EdgeColor', [0.7 0.7 0.7], 'FontSize', 26);
 end
 
 print(f, '-depsc2', '-r300', fullfile(figdir, 'cinematica_directa_esquema.eps'));

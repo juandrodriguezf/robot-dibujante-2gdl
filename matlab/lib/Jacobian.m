@@ -53,11 +53,17 @@ function J = Jacobian(robot, DH, q)
         end
     end
 
-    % Marcos T_0_{i-1} para i = 1..n, obtained de los marcos T_0_i (i=1..n)
+    % Marco de la base {W} -> {0} (identidad si el robot no lo define).
+    base = eye(4);
+    if isstruct(robot) && isfield(robot, 'base') && ~isempty(robot.base)
+        base = robot.base;
+    end
+
+    % Marcos T_0_{i-1} para i = 1..n, obtenidos de los marcos T_0_i (i=1..n)
     % de homogenous_matrix() anteponiendo el marco de la base.
-    [r, p] = homogenous_matrix(DH, q);
-    r = cat(3, eye(3), r);
-    p = [zeros(3, 1), p];
+    [r, p] = homogenous_matrix(DH, q, base);
+    r = cat(3, base(1:3,1:3), r);
+    p = [base(1:3, 4), p];
 
     p_e = p(:, n + 1);
 
