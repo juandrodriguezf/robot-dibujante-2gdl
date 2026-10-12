@@ -10,3 +10,13 @@
 *.step filter=lfs diff=lfs merge=lfs -text
 *.STL filter=lfs diff=lfs merge=lfs -text
 *.stl filter=lfs diff=lfs merge=lfs -text
+
+# Binarios de figuras y media (no normalizar finales de linea)
+*.pdf   -text
+*.eps   -text
+*.png   -text
+*.jpg   -text
+*.jpeg  -text
+*.gif   -text
+*.mp4   -text
+*.mat   -text
