@@ -172,9 +172,123 @@ Los componentes necesarios para el robot se muestran en la tabla \ref{tab:compos
 \subsection{Diseño y modelo CAD}
 \label{sec:disenio}
 
+\subsection{Modelo cinemático directo (Denavit-Hartenberg)}
+\label{sec:dh}
+
+El robot es un manipulador plano de 2 grados de libertad (2R): ambas
+articulaciones son rotacionales ($\sigma_i = 0$) con ejes $z$ paralelos y
+perpendiculares al plano de dibujo. La tabla \ref{tab:dh} resume los parámetros
+de Denavit-Hartenberg en la convención estándar; las longitudes $L_1 = 0.200$ m
+y $L_2 = 0.100$ m se tomaron del modelo CAD (de centro de eje a centro de eje).
+
+\begin{table}[H]
+    \centering
+    \caption{Parámetros Denavit-Hartenberg del robot (convención estándar).}
+    \label{tab:dh}
+    \begin{tabular}{cccccc}
+    \toprule
+    Eslabón & $\theta_i^{off}$ [rad] & $d_i$ [m] & $a_i$ [m] & $\alpha_i$ [rad] & $\sigma_i$ \\
+    \midrule
+    1 & 0 & $d_1 = 0$     & $L_1 = 0.200$ & 0 & 0 \\
+    2 & 0 & 0             & $L_2 = 0.100$ & 0 & 0 \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
+La transformación homogénea que relaciona los marcos $i-1$ e $i$ es
+
+\begin{equation}
+{}^{i-1}_{i}T =
+\begin{bmatrix}
+\cos\theta_i & -\sin\theta_i\cos\alpha_i & \sin\theta_i\sin\alpha_i & a_i\cos\theta_i \\
+\sin\theta_i &  \cos\theta_i\cos\alpha_i & -\cos\theta_i\sin\alpha_i & a_i\sin\theta_i \\
+0            &  \sin\alpha_i              &  \cos\alpha_i            & d_i \\
+0            &  0                         &  0                       & 1
+\end{bmatrix},
+\label{eq:dh_mat}
+\end{equation}
+
+con $\theta_i = q_i + \theta_i^{off}$. Como $\alpha_1 = \alpha_2 = 0$, las
+transformaciones individuales resultan
+
+\begin{equation}
+{}^{0}_{1}T =
+\begin{bmatrix}
+c_1 & -s_1 & 0 & L_1 c_1 \\
+s_1 &  c_1 & 0 & L_1 s_1 \\
+0   &  0   & 1 & d_1 \\
+0   &  0   & 0 & 1
+\end{bmatrix},
+\qquad
+{}^{1}_{2}T =
+\begin{bmatrix}
+c_2 & -s_2 & 0 & L_2 c_2 \\
+s_2 &  c_2 & 0 & L_2 s_2 \\
+0   &  0   & 1 & 0 \\
+0   &  0   & 0 & 1
+\end{bmatrix},
+\label{eq:A1A2}
+\end{equation}
+
+donde $c_i = \cos q_i$ y $s_i = \sin q_i$. El producto acumulativo
+${}^{0}_{2}T = {}^{0}_{1}T\,{}^{1}_{2}T$ da la posición del efector final,
+
+\begin{equation}
+\begin{bmatrix} x \\ y \\ z \end{bmatrix} =
+\begin{bmatrix}
+L_1\cos q_1 + L_2\cos(q_1 + q_2) \\
+L_1\sin q_1 + L_2\sin(q_1 + q_2) \\
+d_1
+\end{bmatrix},
+\label{eq:fk}
+\end{equation}
+
+y una orientación que es una rotación $\phi = q_1 + q_2$ sobre el eje $z$. La
+función \texttt{forward\_kinematics(DH,q)} implementa la ecuación
+\eqref{eq:dh_mat} de forma genérica para $n$ eslabones: parte de $T = I_4$ y
+acumula $T \leftarrow T \cdot {}^{i-1}_{i}T$ para $i = 1, \dots, n$. Admite un
+vector $q$ o una matriz $N \times n$ (trayectoria), en cuyo caso retorna un
+arreglo $4 \times 4 \times N$.
+
 \section{Resultados}
 
 \subsection{Cinemática directa}
+
+La cinemática directa se evaluó en $q = [60^\circ, -50^\circ]$ y se comparó con
+la solución analítica (\eqref{eq:fk}) y con \texttt{SerialLink.fkine} del
+Robotics Toolbox. La tabla \ref{tab:fk_val} resume el resultado: la posición
+calculada coincide con la analítica y con el toolbox con un error máximo de
+$2.8\times10^{-17}$ m. Además, el producto numérico de las matrices
+${}^{0}_{1}T\,{}^{1}_{2}T$ coincide exactamente con
+\texttt{forward\_kinematics}, lo que valida la implementación.
+
+\begin{table}[H]
+    \centering
+    \caption{Validación de la cinemática directa en $q = [60^\circ, -50^\circ]$.}
+    \label{tab:fk_val}
+    \begin{tabular}{lccc}
+    \toprule
+    Método & $x$ [m] & $y$ [m] & $z$ [m] \\
+    \midrule
+    Implementación propia & 0.19848078 & 0.19056990 & 0 \\
+    Solución analítica    & 0.19848078 & 0.19056990 & 0 \\
+    \texttt{SerialLink.fkine()} & 0.19848078 & 0.19056990 & 0 \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
+La figura \ref{fig:cin_dir} muestra el esquema del brazo en esa configuración,
+con los marcos de Denavit-Hartenberg y el volumen de trabajo: una corona con
+$R_{min} = L_1 - L_2 = 0.1$ m y $R_{max} = L_1 + L_2 = 0.3$ m que contiene al
+triángulo de Reuleaux (en azul).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.68\textwidth]{figuras/cinematica_directa_esquema.eps}
+    \caption{Cinemática directa: marcos DH, brazo en $q = [60^\circ, -50^\circ]$
+    y volumen de trabajo.}
+    \label{fig:cin_dir}
+\end{figure}
 
 \subsection{Cinemática inversa}
 

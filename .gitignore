@@ -21,6 +21,8 @@ slprj/
 *.synctex.gz
 *.bbl
 *.blg
+*-eps-converted-to.pdf
+docs/*/main.pdf
 
 # SolidWorks temporales
 ~$*
