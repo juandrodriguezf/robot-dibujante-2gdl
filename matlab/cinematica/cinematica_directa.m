@@ -8,7 +8,7 @@
 %      contra el Robotics Toolbox de Peter Corke (SerialLink.fkine).
 %   3. Figura vectorial del esquema (marcos DH, brazo y volumen de trabajo).
 %
-% Requiere: plotter_param.m, forward_kinematics.m, homogenous_matrix.m y, para
+% Requiere: plotter_param.m, forward_kinematics.m, homogeneous_matrix.m y, para
 % la validacion, add_rvc_path.m (Robotics Toolbox opcional).
 
 clear;
@@ -17,6 +17,7 @@ close all;
 
 aqui = fileparts(mfilename('fullpath'));
 addpath(fullfile(aqui, '..', 'lib'));
+addpath(fullfile(aqui, '..', 'params'));
 add_rvc_path();
 
 figdir = fullfile(aqui, '..', '..', 'docs', 'informe-1', 'figuras');
@@ -107,7 +108,7 @@ Rmin = L1 - L2;
 Rmax = L1 + L2;
 
 q_brazo = deg2rad([60 -50]);
-[R, pj] = homogenous_matrix(DH, q_brazo, base);
+[R, pj] = homogeneous_matrix(DH, q_brazo, base);
 p_all = [zeros(3,1), pj];
 r_all = cat(3, eye(3), R);
 

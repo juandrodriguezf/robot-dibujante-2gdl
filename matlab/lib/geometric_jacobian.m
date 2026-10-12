@@ -1,7 +1,7 @@
-function J = Jacobian(robot, DH, q)
-%Jacobian  Jacobiano geometrico de un robot serialmente acoplado.
+function J = geometric_jacobian(robot, DH, q)
+%geometric_jacobian  Jacobiano geometrico de un robot serialmente acoplado.
 %
-%   J = Jacobian(robot, DH, q)
+%   J = geometric_jacobian(robot, DH, q)
 %
 %   Entradas:
 %       robot : estructura del robot obtenida con puma_param(). Se usa
@@ -35,20 +35,20 @@ function J = Jacobian(robot, DH, q)
 %   orientacion.
 
     if nargin < 3
-        error('Jacobian:args', 'Se requieren las entradas robot, DH y q.');
+        error('geometric_jacobian:args', 'Se requieren las entradas robot, DH y q.');
     end
 
     n = size(DH, 1);
     q = q(:)';
 
     if length(q) ~= n
-        error('Jacobian:badq', ...
+        error('geometric_jacobian:badq', ...
             'q debe contener %d valores (uno por articulacion).', n);
     end
 
     if isstruct(robot) && isfield(robot, 'DH')
         if size(robot.DH, 1) ~= n
-            error('Jacobian:badrobot', ...
+            error('geometric_jacobian:badrobot', ...
                 'robot y DH describen robots con distinto numero de GDL.');
         end
     end
@@ -60,8 +60,8 @@ function J = Jacobian(robot, DH, q)
     end
 
     % Marcos T_0_{i-1} para i = 1..n, obtenidos de los marcos T_0_i (i=1..n)
-    % de homogenous_matrix() anteponiendo el marco de la base.
-    [r, p] = homogenous_matrix(DH, q, base);
+    % de homogeneous_matrix() anteponiendo el marco de la base.
+    [r, p] = homogeneous_matrix(DH, q, base);
     r = cat(3, base(1:3,1:3), r);
     p = [base(1:3, 4), p];
 

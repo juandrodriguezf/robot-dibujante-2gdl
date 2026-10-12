@@ -11,8 +11,8 @@
 %      frente al limite de los servos.
 %   5. Figuras vectoriales (fuente >= 26 pt).
 %
-% Requiere: plotter_param.m, forward_kinematics.m, homogenous_matrix.m,
-% Jacobian.m, ikine.m, trayectoria_reuleaux.m, trayectoria_polinomios.m,
+% Requiere: plotter_param.m, forward_kinematics.m, homogeneous_matrix.m,
+% geometric_jacobian.m, ikine.m, trayectoria_reuleaux.m, trayectoria_polinomios.m,
 % add_rvc_path.m.
 
 clear;
@@ -23,6 +23,7 @@ aqui = fileparts(mfilename('fullpath'));
 addpath(aqui);
 addpath(fullfile(aqui, '..', 'lib'));
 addpath(fullfile(aqui, '..', 'cinematica'));
+addpath(fullfile(aqui, '..', 'params'));
 add_rvc_path();
 
 figdir = fullfile(aqui, '..', '..', 'docs', 'informe-1', 'figuras');
@@ -67,7 +68,7 @@ fprintf('Iteraciones media/max   : %.1f / %d\n', mean(info.iterations), max(info
 % Velocidades y aceleraciones articulares via el Jacobiano
 Jv = zeros(2,2,M);
 for k = 1:M
-    J = Jacobian(robot, DH, q(k,:));
+    J = geometric_jacobian(robot, DH, q(k,:));
     Jv(:,:,k) = J(1:2,:);
 end
 qd  = zeros(2,M);

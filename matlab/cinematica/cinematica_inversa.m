@@ -12,8 +12,8 @@
 %      trabajo.
 %   6. Figuras vectoriales.
 %
-% Requiere: plotter_param.m, forward_kinematics.m, homogenous_matrix.m,
-% Jacobian.m, ikine.m y add_rvc_path.m (Robotics Toolbox opcional).
+% Requiere: plotter_param.m, forward_kinematics.m, homogeneous_matrix.m,
+% geometric_jacobian.m, ikine.m y add_rvc_path.m (Robotics Toolbox opcional).
 
 clear;
 clc;
@@ -21,6 +21,7 @@ close all;
 
 aqui = fileparts(mfilename('fullpath'));
 addpath(fullfile(aqui, '..', 'lib'));
+addpath(fullfile(aqui, '..', 'params'));
 add_rvc_path();
 
 figdir = fullfile(aqui, '..', '..', 'docs', 'informe-1', 'figuras');
@@ -41,7 +42,7 @@ Rmax = L1 + L2;
 % ------------------------------------------------ 1. JACOBIANO
 fprintf('--- 1. Jacobiano geometrico ------------------------------------\n');
 q_v = deg2rad([30 -70]);
-J   = Jacobian(robot, DH, q_v);
+J   = geometric_jacobian(robot, DH, q_v);
 Jv  = J(1:2, :);          % parte lineal planar (la fila z es nula)
 
 q1 = q_v(1); q2 = q_v(2);
@@ -162,8 +163,8 @@ legend([hMax hMin hRama(1) hRama(2) hStar], ...
         'Orientation', 'horizontal', 'NumColumns', 2);
 xlim([-Rmax*1.05 Rmax*1.05]);
 estilizar(f1);
-print(f1, '-depsc2', '-r300', fullfile(figdir, 'cinematica_inversa_ramas.eps'));
-fprintf('Figura guardada: cinematica_inversa_ramas.eps\n');
+print(f1, '-depsc2', '-r300', fullfile(figdir, 'ik_ramas.eps'));
+fprintf('Figura guardada: ik_ramas.eps\n');
 
 % Figura 2: manipulabilidad frente al radio
 f2 = figure('Color', 'w', 'Position', [100 100 950 800]);
@@ -179,8 +180,8 @@ legend([hCurva hRango], {'|det J_v|', 'Rango radial del triangulo'}, ...
        'Location', 'southoutside', 'Orientation', 'horizontal', 'NumColumns', 2);
 xlim([Rmin Rmax]); ylim(yl);
 estilizar(f2);
-print(f2, '-depsc2', '-r300', fullfile(figdir, 'cinematica_inversa_singularidad.eps'));
-fprintf('Figura guardada: cinematica_inversa_singularidad.eps\n');
+print(f2, '-depsc2', '-r300', fullfile(figdir, 'ik_singularidad.eps'));
+fprintf('Figura guardada: ik_singularidad.eps\n');
 
 fprintf('\ncinematica_inversa.m: completado.\n');
 

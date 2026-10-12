@@ -5,7 +5,7 @@ function tf = add_rvc_path()
 %       tf: true si el toolbox quedo disponible, false en caso contrario.
 %
 %   El Robotics Toolbox NO es necesario para la cinematica inversa: las
-%   funciones Jacobian() e ikine() de este taller solo dependen de la
+%   funciones geometric_jacobian() e ikine() de este taller solo dependen de la
 %   cinematica directa propia. El toolbox se usa unicamente para contrastar
 %   los resultados contra las funciones de referencia SerialLink.fkine(),
 %   SerialLink.jacob0() y SerialLink.ikine().

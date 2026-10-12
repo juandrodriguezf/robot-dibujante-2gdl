@@ -1,7 +1,7 @@
 % Esta función permite obtener las matrices de rotación y el vector de
 % posición a partir de las matrices homogéneas que definen al robot 
 
-function [r, p] = homogenous_matrix(DH,q,base)
+function [r, p] = homogeneous_matrix(DH,q,base)
 
 n = size(DH, 1);
 q = q(:)';

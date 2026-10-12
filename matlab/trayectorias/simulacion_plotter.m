@@ -19,6 +19,7 @@ aqui = fileparts(mfilename('fullpath'));
 addpath(aqui);
 addpath(fullfile(aqui, '..', 'lib'));
 addpath(fullfile(aqui, '..', 'cinematica'));
+addpath(fullfile(aqui, '..', 'params'));
 add_rvc_path();
 
 outdir = fullfile(aqui, '..', '..', 'docs', 'media');

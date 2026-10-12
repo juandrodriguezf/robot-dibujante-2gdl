@@ -141,7 +141,7 @@ function [q, info] = ikine(robot, T, q_inicial, opts)
         for it = 1:opts.max_iter
             iter = it;
 
-            [~, p] = homogenous_matrix(DH, q_act, base);
+            [~, p] = homogeneous_matrix(DH, q_act, base);
             e   = p_objetivo - p(:, n);
             err = norm(e);
 
@@ -150,7 +150,7 @@ function [q, info] = ikine(robot, T, q_inicial, opts)
                 break
             end
 
-            J  = Jacobian(robot, DH, q_act);
+            J  = geometric_jacobian(robot, DH, q_act);
             Jv = J(1:3, :);
 
             if opts.lambda > 0
@@ -182,11 +182,11 @@ function [q, info] = ikine(robot, T, q_inicial, opts)
         end
 
         if ~converged
-            [~, p] = homogenous_matrix(DH, q_act, base);
+            [~, p] = homogeneous_matrix(DH, q_act, base);
             err = norm(p_objetivo - p(:, n));
         end
 
-        Jv = Jacobian(robot, DH, q_act);
+        Jv = geometric_jacobian(robot, DH, q_act);
         Jv = Jv(1:3, :);
         s  = svd(Jv);
 

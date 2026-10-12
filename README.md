@@ -27,13 +27,17 @@ de trayectoria →  inversa     →     de articulador →   (manipulador) →  
 ```
 ├── docs/                    Informes (LaTeX) por entregable
 │   ├── informe-1/           Parte 1: especificaciones y modelado cinemático (Puntos 1-7)
+│   │   └── figuras/         Figuras del informe (vectoriales y capturas)
 │   ├── informe-2/           Parte 2: modelado dinámico (Puntos 8-11)
-│   └── informe-final/       Parte 3: fabricación y pruebas (Puntos 12-14)
-├── cad/                     Modelo CAD (SolidWorks) + exportaciones STEP/STL
+│   ├── informe-final/       Parte 3: fabricación y pruebas (Puntos 12-14)
+│   └── media/               Video/GIF de la simulación animada
+├── cad/                     Modelo CAD (SolidWorks)
+│   └── export/              Mallas STL, plotter_mallas_CAD.mat y propiedades de masa
 ├── matlab/                  Código MATLAB
 │   ├── lib/                 Funciones genéricas reutilizables (FK, Jacobiano, IK, ...)
+│   ├── params/              Parámetros del robot (modelo cinemático/dinámico)
 │   ├── cinematica/          Cinemática directa e inversa (Puntos 5-6)
-│   ├── trayectorias/        Planeación de trayectorias (Punto 7)
+│   ├── trayectorias/        Planeación de trayectorias y simulación CAD (Punto 7)
 │   ├── dinamica/            Dinámica Newton-Euler (Punto 8)
 │   └── control/             Modelos y control en Simulink (Puntos 10-11)
 ├── firmware/                Firmware Arduino (Puntos 13-14)
@@ -53,17 +57,19 @@ de trayectoria →  inversa     →     de articulador →   (manipulador) →  
 ```matlab
 % En MATLAB, desde la raíz del repositorio:
 addpath(genpath('matlab'));
-run('matlab/cinematica/main.m')
+main
 ```
 
-`main.m` valida la cinemática contra el Robotics Toolbox y exporta las figuras
-a `docs/informe-1/figuras/`.
+`main.m` ejecuta la cinemática directa (Punto 5), la cinemática inversa
+(Punto 6), la planeación de trayectorias (Punto 7) y la simulación animada con
+las mallas CAD. Las figuras vectoriales se exportan a `docs/informe-1/figuras/`
+y el video/GIF de la simulación a `docs/media/`.
 
 ## Estado
 
 | Entregable | Puntos | Estado |
 |---|---|---|
-| Informe 1 (Semana 10) | 1-7 | En desarrollo |
+| Informe 1 (Semana 10) | 1-7 | Completo |
 | Informe 2 (Semana 13) | 8-11 | Pendiente |
 | Informe final (Semana 16) | 12-14 | Pendiente |
 
