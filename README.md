@@ -73,6 +73,14 @@ y el video/GIF de la simulación a `docs/media/`.
 | Informe 2 (Semana 13) | 8-11 | Pendiente |
 | Informe final (Semana 16) | 12-14 | Pendiente |
 
+## Ramas
+
+- **`main`** — versión estable; solo recibe integraciones ya probadas.
+- **`develop`** — rama de trabajo diario; casi todos los cambios se hacen aquí.
+
+Flujo: se trabaja y se commitea en `develop`, y cuando está estable se integra a
+`main` mediante un *pull request* `develop → main`.
+
 ## Autores
 
 - José Elkin Estrada Morales — estradam_jose@javeriana.edu.co
