@@ -1,0 +1,35 @@
+# MATLAB
+*.asv
+*.autosave
+*.mex*
+slprj/
+*.slxc
+
+# Simulink
+*.slx.r*
+*.slx.autosave
+
+# LaTeX
+*.aux
+*.log
+*.toc
+*.lof
+*.lot
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+# SolidWorks temporales
+~$*
+*.tmp
+*.sldasm~
+*.sldprt~
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
