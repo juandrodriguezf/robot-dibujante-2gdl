@@ -208,29 +208,8 @@ La transformación homogénea que relaciona los marcos $i-1$ e $i$ es
 \label{eq:dh_mat}
 \end{equation}
 
-con $\theta_i = q_i + \theta_i^{off}$. Como $\alpha_1 = \alpha_2 = 0$, las
-transformaciones individuales resultan
-
-\begin{equation}
-{}^{0}_{1}T =
-\begin{bmatrix}
-c_1 & -s_1 & 0 & L_1 c_1 \\
-s_1 &  c_1 & 0 & L_1 s_1 \\
-0   &  0   & 1 & d_1 \\
-0   &  0   & 0 & 1
-\end{bmatrix},
-\qquad
-{}^{1}_{2}T =
-\begin{bmatrix}
-c_2 & -s_2 & 0 & L_2 c_2 \\
-s_2 &  c_2 & 0 & L_2 s_2 \\
-0   &  0   & 1 & 0 \\
-0   &  0   & 0 & 1
-\end{bmatrix},
-\label{eq:A1A2}
-\end{equation}
-
-donde $c_i = \cos q_i$ y $s_i = \sin q_i$. El producto acumulativo
+con $\theta_i = q_i + \theta_i^{off}$ y $\alpha_1 = \alpha_2 = 0$ (con
+$c_i = \cos q_i$, $s_i = \sin q_i$). El producto acumulativo
 ${}^{0}_{2}T = {}^{0}_{1}T\,{}^{1}_{2}T$ da la posición del efector final,
 
 \begin{equation}
@@ -283,9 +262,9 @@ q_{k+1} = q_k + J_v^{+}(q_k)\,\bigl(p_{obj} - p_e(q_k)\bigr),
 con $J_v^{+}$ la pseudoinversa de Moore--Penrose. Cerca de una singularidad se
 usa la solución amortiguada de Levenberg--Marquardt
 $J_v^{+} = (J_v J_v^{T} + \lambda^2 I)^{-1} J_v^{T}$. La función
-\texttt{ikine(robot,T,q\_inicial)} implementa \eqref{eq:newton} con las opciones
-de la tabla \ref{tab:ik_opts}; para una trayectoria cartesiana encadena la
-solución de cada punto como semilla del siguiente.
+\texttt{ikine(robot,T,q\_inicial)} implementa \eqref{eq:newton}; para una
+trayectoria cartesiana encadena la solución de cada punto como semilla del
+siguiente.
 
 Para 2 GdL con tarea de posición en el plano el sistema es cuadrado
 ($J_v \in \mathbb{R}^{2\times 2}$): no hay redundancia y el método converge a la
@@ -300,21 +279,39 @@ q_1 = \operatorname{atan2}(y,x) - \operatorname{atan2}\!\bigl(L_2\sin q_2,\; L_1
 \label{eq:ik_cf}
 \end{equation}
 
-\begin{table}[H]
-    \centering
-    \caption{Opciones de \texttt{ikine()} (valores por defecto).}
-    \label{tab:ik_opts}
-    \begin{tabular}{llc}
-    \toprule
-    Parámetro & Descripción & Valor \\
-    \midrule
-    \texttt{tol}      & tolerancia de posición [m]            & $10^{-10}$ \\
-    \texttt{max\_iter}& iteraciones máximas                   & 200 \\
-    \texttt{lambda}   & amortiguamiento ($0$ = sin amortiguar) & 0 \\
-    \texttt{max\_step}& paso máximo por iteración [rad]       & 0.5 \\
-    \bottomrule
-    \end{tabular}
-\end{table}
+Las opciones de \texttt{ikine()} son una tolerancia de $10^{-10}$ m, hasta 200
+iteraciones, amortiguamiento $\lambda = 0$ (se activa solo cerca de
+singularidades) y un paso máximo de $0.5$ rad por iteración.
+
+\subsection{Planeación de trayectorias}
+\label{sec:tray}
+
+La figura a dibujar es el triángulo de Reuleaux de ancho $w = 0.10$ m centrado en
+$(0, 0.20)$ m. Se discretiza el contorno en puntos de paso y se interpola cada
+coordenada con un spline cúbico,
+
+\begin{equation}
+r(t) = \begin{bmatrix} x(t) \\ y(t) \end{bmatrix},
+\qquad r(t_k) = r_k, \qquad t_k \propto \text{longitud de arco},
+\label{eq:spline}
+\end{equation}
+
+de modo que $r(t)$ es de clase $C^2$ y la velocidad es continua ($C^1$). Para
+evitar discontinuidades de curvatura en los tres vértices del triángulo, el
+recorrido se divide en tres segmentos con un reescalado temporal suave
+(\textit{smoothstep}) que anula la velocidad cartesiana en cada vértice. Las
+trayectorias articulares se obtienen por cinemática inversa punto a punto y sus
+derivadas con el Jacobiano:
+
+\begin{equation}
+\dot q = J_v^{-1}\,\dot r, \qquad
+\ddot q = J_v^{-1}\bigl(\ddot r - \dot J_v\,\dot q\bigr),
+\label{eq:qdot}
+\end{equation}
+
+donde $\dot J_v$ se aproxima por diferencias finitas centrales. El procedimiento
+(muestreo a $100$ Hz, $T = 20$ s) se implementa en
+\texttt{trayectoria\_test.m}.
 
 \section{Resultados}
 
@@ -350,7 +347,7 @@ triángulo de Reuleaux (en azul).
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.68\textwidth]{figuras/cinematica_directa_esquema.eps}
+    \includegraphics[width=0.46\textwidth]{figuras/cinematica_directa_esquema.eps}
     \caption{Cinemática directa: marcos DH, brazo en $q = [60^\circ, -50^\circ]$
     y volumen de trabajo.}
     \label{fig:cin_dir}
@@ -391,7 +388,7 @@ $3\times10^{-11}$ m y convergencia en 7--10 iteraciones (tabla
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.62\textwidth]{figuras/cinematica_inversa_ramas.eps}
+    \includegraphics[width=0.44\textwidth]{figuras/cinematica_inversa_ramas.eps}
     \caption{Cinemática inversa: las dos configuraciones (codo arriba / codo
     abajo) que llevan el efector final al mismo punto objetivo.}
     \label{fig:ik_ramas}
@@ -406,7 +403,7 @@ la zona de buena manipulabilidad, alejado de las configuraciones singulares.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.66\textwidth]{figuras/cinematica_inversa_singularidad.eps}
+    \includegraphics[width=0.46\textwidth]{figuras/cinematica_inversa_singularidad.eps}
     \caption{Manipulabilidad $|\det J_v|$ frente al radio del efector final;
     la banda naranja marca el rango radial ocupado por el triángulo de Reuleaux.}
     \label{fig:ik_sing}
@@ -414,6 +411,48 @@ la zona de buena manipulabilidad, alejado de las configuraciones singulares.
 
 \subsection{Planeación de trayectorias}
 
+El contorno se discretizó en $50$ puntos de paso y se muestreó a $\Delta t =
+0.01$ s ($2001$ muestras). La cinemática inversa convergió en los $2001$ puntos
+con un error máximo de posición de $1.0\times10^{-10}$ m, y la posición
+reconstruida por cinemática directa coincide con $r(t)$ con ese mismo orden de
+error. La figura \ref{fig:tray_cart} muestra las componentes $x(t)$ y $y(t)$ y el
+trazado en el plano; la figura \ref{fig:tray_art} presenta las trayectorias
+articulares $q(t)$, $\dot q(t)$ y $\ddot q(t)$ obtenidas por cinemática inversa.
+
+La tabla \ref{tab:tray_lim} resume los máximos articulares. Las velocidades
+máximas ($0.15$ y $0.21$ rad/s) quedan holgadamente por debajo del límite de los
+servos Futaba S3003 ($5.5$ rad/s), y la velocidad cartesiana tiende a cero en los
+tres vértices, como exige el requerimiento de continuidad.
+
+\begin{table}[H]
+    \centering
+    \caption{Máximos articulares de la trayectoria del triángulo de Reuleaux.}
+    \label{tab:tray_lim}
+    \begin{tabular}{lccc}
+    \toprule
+    Articulación & máx $|q|$ [rad] & máx $|\dot q|$ [rad/s] & máx $|\ddot q|$ [rad/s$^2$] \\
+    \midrule
+    1 & 1.333 & 0.150 & 0.102 \\
+    2 & 2.250 & 0.206 & 0.413 \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.60\textwidth]{figuras/trayectoria_cartesiana.eps}
+    \caption{Trayectoria cartesiana: componentes $x(t)$ y $y(t)$ y trazado
+    interpolado del triángulo de Reuleaux en el plano.}
+    \label{fig:tray_cart}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.46\textwidth]{figuras/trayectoria_articular.eps}
+    \caption{Trayectorias articulares por cinemática inversa: posición,
+    velocidad y aceleración.}
+    \label{fig:tray_art}
+\end{figure}
 
 \section{Conclusiones}
 
