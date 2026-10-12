@@ -56,7 +56,7 @@ El presente proyecto tiene como objetivo diseñar y fabricar un robot manipulado
     % Primera figura (a)
     \begin{subfigure}[b]{0.25\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{figuras/quanser.jpg} % Reemplaza por tu primera imagen
+        \includegraphics[width=\textwidth]{figuras/quanser.pdf} % Reemplaza por tu primera imagen
         \caption{\textit{Drawing manipulator} de Quanser \cite{barbosa_quanser}.}
         \label{fig:draw_manipu}
     \end{subfigure}
@@ -64,7 +64,7 @@ El presente proyecto tiene como objetivo diseñar y fabricar un robot manipulado
     % Segunda figura (b)
     \begin{subfigure}[b]{0.25\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{figuras/triang.png} % Reemplaza por tu segunda imagen
+        \includegraphics[width=\textwidth]{figuras/triangulo_reuleaux.pdf} % Reemplaza por tu segunda imagen
         \caption{Triaángulo de Reuleaux}
         \label{fig:reul_triag}
     \end{subfigure}
@@ -78,7 +78,7 @@ La tarea concreta del robot será seguir una trayectoria continua con la geometr
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\linewidth]{figuras/block_diagram.png}
+    \includegraphics[width=0.75\linewidth]{figuras/diagrama_bloques.pdf}
     \caption{Diagrama de bloques del funcionamiento del sistema}
     \label{fig:block_diagram}
 \end{figure}
@@ -99,18 +99,12 @@ Los requerimientos del robot dependen de aspectos como complejidad de las trayec
 \end{itemize}
 \textbf{Carga a soportar: } Los marcadores suelen tener una masa aproximadamente de 30 g, lo que implica un peso de 0.294 N. No es una carga significativa.
 
-\textbf{Volumen de trabajo: } Es el conjunto de todos los puntos en el espacio tridimensional o bidimensional $(x, y)$ que el efector final del robot puede alcanzar \cite{spong}. Para un robot de 2 GdL plano, el volumen de trabajo es una región plana 2D con la forma de una semicorona circular con radio interior $R_{min} = L_1 - L_2$ y radio exterior $R_{max} = L_1 + L_2$. Como se verá en la sección \ref{sec:disenio}, se seleccionó $L_1 = 20 \text{ cm}$ y $L_2 = 10 \text{ cm}$. En ese orden de ideas, el volumen de trabajo visualizado desde arriba corresponde a lo ilustrado en la figura \ref{fig:2d_workspace}, mientras que la región 3D por la que el efector final puede desplazarse se muestra en la figura \ref{fig:3d_workspace}.
+\textbf{Volumen de trabajo: } Es el conjunto de todos los puntos en el espacio tridimensional o bidimensional $(x, y)$ que el efector final del robot puede alcanzar \cite{spong}. Para un robot de 2 GdL plano, el volumen de trabajo es una región plana 2D con la forma de una semicorona circular con radio interior $R_{min} = L_1 - L_2$ y radio exterior $R_{max} = L_1 + L_2$. Como se verá en la sección \ref{sec:disenio}, se seleccionó $L_1 = 20 \text{ cm}$ y $L_2 = 10 \text{ cm}$. En ese orden de ideas, la región plana 2D del volumen de trabajo corresponde a una semicorona circular, mientras que la región 3D por la que el efector final puede desplazarse se muestra en la figura \ref{fig:3d_workspace}.
+
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\linewidth]{figuras/2d_workspace.pdf}
-    \caption{Volumen de trabajo 2D del robot manipulador}
-    \label{fig:2d_workspace}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{figuras/3d_workspace.pdf}
+    \includegraphics[width=0.6\linewidth]{figuras/espacio_trabajo_3d.pdf}
     \caption{Volumen de trabajo 3D del robot manipulador}
     \label{fig:3d_workspace}
 \end{figure}
@@ -168,308 +162,160 @@ Los componentes necesarios para el robot se muestran en la tabla \ref{tab:compos
         \raggedright \footnotesize $^*$ Como puede intuirse, las velocidades máximas articulares del robot coinciden con las velocidad de los servomotores.
     \end{minipage}
 \end{table}
-
-\subsection{Diseño y modelo CAD}
+\section{Dise\~no y par\'ametros DH}
 \label{sec:disenio}
-
-\subsection{Modelo cinemático directo (Denavit-Hartenberg)}
-\label{sec:dh}
-
-El robot es un manipulador plano de 2 grados de libertad (2R): ambas
-articulaciones son rotacionales ($\sigma_i = 0$) con ejes $z$ paralelos y
-perpendiculares al plano de dibujo. La tabla \ref{tab:dh} resume los parámetros
-de Denavit-Hartenberg en la convención estándar; las longitudes $L_1 = 0.200$ m,
-$L_2 = 0.100$ m y las cotas verticales $d_1$, $d_2$ se tomaron del modelo CAD
-(de centro de eje a centro de eje). El marco mundo $\{W\}$ está sobre el papel y
-$\{W\}\to\{0\} = \mathrm{trasl}(0,0,h_0)$ con $h_0 = 0.0485$ m.
-
-\begin{table}[H]
-    \centering
-    \caption{Parámetros Denavit-Hartenberg del robot (convención estándar).}
-    \label{tab:dh}
-    \begin{tabular}{cccccc}
-    \toprule
-    Eslabón & $\theta_i^{off}$ [rad] & $d_i$ [m] & $a_i$ [m] & $\alpha_i$ [rad] & $\sigma_i$ \\
-    \midrule
-    1 & 0 & $d_1 = 0.0200$  & $L_1 = 0.200$ & 0 & 0 \\
-    2 & 0 & $d_2 = -0.0685$ & $L_2 = 0.100$ & 0 & 0 \\
-    \bottomrule
-    \end{tabular}
+El robot tiene una base fija y dos eslabones de balso, cada uno movido por un servo; el esfero va en el extremo del eslab\'on~2. Los dos ejes son verticales y paralelos, por lo que la punta se mueve en el plano del papel.
+ 
+\textbf{Marcos y par\'ametros DH.} Se us\'o la convenci\'on DH est\'andar (Fig.~\ref{fig:marcos}). El marco mundo $\{W\}$ est\'a sobre el papel y $\{0\}$ queda sobre el eje del servo~1 a $h_0=48{,}5$~mm de altura: ${}^{W}\mathbf{T}_{0}=\mathrm{trasl}(0,0,h_0)$. Los ejes $z_0$ y $z_1$ son verticales, as\'i que $\alpha_1=\alpha_2=0$ y las articulaciones son rotacionales ($\sigma_i=0$). Los dem\'as par\'ametros salen de la geometr\'ia (Tabla~\ref{tab:dh}):
+$a_1=200$~mm y $a_2=100$~mm son las distancias entre ejes; $d_1=20$~mm es la altura de $\{0\}$ a $\{1\}$ (plano del eslab\'on~2), por lo que $\{1\}$ queda a $h_0+d_1=68{,}5$~mm del papel; y $d_2=-68{,}5$~mm baja de $\{1\}$ hasta $\{2\}$, ubicado en la punta del esfero sobre el papel ($z_W=0$).
+ 
+\begin{table}[!t]
+\caption{Par\'ametros DH (est\'andar), $q_i\in[-90^\circ,90^\circ]$}
+\label{tab:dh}
+\centering
+\begin{tabular}{c c c c c c}
+\toprule
+$i$ & $\theta_i$ & $d_i$ [m] & $a_i$ [m] & $\alpha_i$ [rad] & $\sigma_i$ \\
+\midrule
+1 & $q_1$ & $+0{,}0200$ & $0{,}2000$ & 0 & 0 \\
+2 & $q_2$ & $-0{,}0685$ & $0{,}1000$ & 0 & 0 \\
+\bottomrule
+\end{tabular}
 \end{table}
-
-La transformación homogénea que relaciona los marcos $i-1$ e $i$ es
-
+ 
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.7\columnwidth]{figuras/esquematico_1.png}\hfill
+\includegraphics[width=0.7\columnwidth]{figuras/esquematico_2.png}
+\caption{Marcos $\{W\}$, $\{0\}$, $\{1\}$, $\{2\}$ y dimensiones del robot.}
+\label{fig:marcos}
+\end{figure}
+ 
+Con estos valores, las matrices de transformaci\'on son
 \begin{equation}
-{}^{i-1}_{i}T =
-\begin{bmatrix}
-\cos\theta_i & -\sin\theta_i\cos\alpha_i & \sin\theta_i\sin\alpha_i & a_i\cos\theta_i \\
-\sin\theta_i &  \cos\theta_i\cos\alpha_i & -\cos\theta_i\sin\alpha_i & a_i\sin\theta_i \\
-0            &  \sin\alpha_i              &  \cos\alpha_i            & d_i \\
-0            &  0                         &  0                       & 1
-\end{bmatrix},
-\label{eq:dh_mat}
+{}^{0}\mathbf{A}_{1}\!=\!\begin{bmatrix}c_1&-s_1&0&0{,}2c_1\\ s_1&c_1&0&0{,}2s_1\\ 0&0&1&0{,}02\\ 0&0&0&1\end{bmatrix}\!,\;
+{}^{1}\mathbf{A}_{2}\!=\!\begin{bmatrix}c_2&-s_2&0&0{,}1c_2\\ s_2&c_2&0&0{,}1s_2\\ 0&0&1&-0{,}0685\\ 0&0&0&1\end{bmatrix}
 \end{equation}
-
-con $\theta_i = q_i + \theta_i^{off}$ y $\alpha_1 = \alpha_2 = 0$ (con
-$c_i = \cos q_i$, $s_i = \sin q_i$). El producto acumulativo
-${}^{0}_{2}T = {}^{0}_{1}T\,{}^{1}_{2}T$ da la posición del efector final,
-
+y ${}^{W}\mathbf{T}_{2}={}^{W}\mathbf{T}_{0}\,{}^{0}\mathbf{A}_{1}\,{}^{1}\mathbf{A}_{2}$. La altura de la punta es $0{,}0485+0{,}02-0{,}0685=0$ y su posici\'on en el plano es $x=0{,}2\cos q_1+0{,}1\cos(q_1+q_2)$, $y=0{,}2\sin q_1+0{,}1\sin(q_1+q_2)$. En \textit{home} la punta queda en $(0{,}3;\,0;\,0)$~m.
+ 
+\textbf{Masas e inercias.} Se obtuvieron en SolidWorks (propiedades de masa) agrupando las piezas por cuerpo r\'igido: la base lleva el servo~1 y el eslab\'on~1 lleva el servo~2, que viaja con \'el; el eslab\'on~2 incluye el balso, el \textit{horn} y el esfero. Los valores est\'an referidos al centro de masa y expresados en los ejes del marco $\{i\}$ de cada eslab\'on. Las masas son $m_1=43{,}90$~g y $m_2=10{,}34$~g (54,24~g en movimiento), con centros de masa
+$\mathbf{r}_1=[-0{,}02689;\,0;\,-0{,}02310]$~m y $\mathbf{r}_2=[-0{,}02227;\,0;\,0{,}07451]$~m, y tensores de inercia (kg\,m$^2$)
+{\footnotesize
 \begin{equation}
-\begin{bmatrix} x \\ y \\ z \end{bmatrix} =
-\begin{bmatrix}
-L_1\cos q_1 + L_2\cos(q_1 + q_2) \\
-L_1\sin q_1 + L_2\sin(q_1 + q_2) \\
-h_0 + d_1 + d_2
-\end{bmatrix},
-\label{eq:fk}
+\mathbf{I}_1\!=\!\begin{bmatrix}6{,}0512\mathrm{e}{-6}&0&3{,}7272\mathrm{e}{-6}\\ 0&1{,}0736\mathrm{e}{-4}&0\\ 3{,}7272\mathrm{e}{-6}&0&1{,}0469\mathrm{e}{-4}\end{bmatrix}
 \end{equation}
-
-donde $h_0 = 0.0485$ m es la traslación del marco mundo y $d_2$ es negativa, de
-modo que la punta del marcador queda sobre el papel ($z = 0$). La orientación es
-una rotación $\phi = q_1 + q_2$ sobre el eje $z$. La
-función \texttt{forward\_kinematics(DH,q)} implementa la ecuación
-\eqref{eq:dh_mat} de forma genérica para $n$ eslabones: parte de $T = I_4$ y
-acumula $T \leftarrow T \cdot {}^{i-1}_{i}T$ para $i = 1, \dots, n$. Admite un
-vector $q$ o una matriz $N \times n$ (trayectoria), en cuyo caso retorna un
-arreglo $4 \times 4 \times N$.
-
-\subsection{Cinemática inversa (método del Jacobiano)}
-\label{sec:ik}
-
-Para el brazo plano la velocidad del efector final es lineal en las velocidades
-articulares, $\dot p_e = J_v(q)\,\dot q$, con el Jacobiano lineal
-
 \begin{equation}
-J_v(q) =
-\begin{bmatrix}
--L_1 s_1 - L_2 s_{12} & -L_2 s_{12} \\
- \phantom{-}L_1 c_1 + L_2 c_{12} &  \phantom{-}L_2 c_{12}
-\end{bmatrix},
-\qquad
-\det J_v = L_1 L_2 \sin q_2,
-\label{eq:jac}
+\mathbf{I}_2\!=\!\begin{bmatrix}8{,}5081\mathrm{e}{-6}&0&-1{,}0612\mathrm{e}{-6}\\ 0&2{,}2523\mathrm{e}{-5}&0\\ -1{,}0612\mathrm{e}{-6}&0&1{,}4440\mathrm{e}{-5}\end{bmatrix}
 \end{equation}
+}
+Como los ejes son verticales, en el plano solo intervienen $I_{zz}$ y la posici\'on de los centros de masa.
+ 
+\textbf{Validaci\'on.} El modelo se implement\'o con \texttt{SerialLink} cargando la Tabla~\ref{tab:dh} y los valores anteriores, y se verific\'o que: (i) \texttt{fkine([0 0])} da $(0{,}3;0;0)$~m, igual al CAD; (ii) con 2000 poses aleatorias, \texttt{fkine} coincide con las matrices DH a mano y con la geometr\'ia anal\'itica (error $<10^{-12}$); (iii) la matriz de inercia $\mathbf{M}(\mathbf{q})$ de la toolbox coincide con un c\'alculo independiente por Steiner (error $<10^{-10}$); (iv) la masa en movimiento coincide con SolidWorks; y (v) \texttt{gravload}$\,\approx 0$, pues la estructura soporta el peso y los servos solo vencen la inercia.
+ 
+%-----------------------------------------------------------------------
+\section{Modelo CAD}
+El modelo se realiz\'o en SolidWorks como ensamblaje (\texttt{Plotter\_2GdL.SLDASM}) con base, dos eslabones de balso de 6~mm, dos servos S3003, \textit{horn} y esfero (Fig.~\ref{fig:cad}). De \'el se extrajeron las longitudes, los desplazamientos $d_i$, las masas y las inercias usadas arriba.
+ 
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\columnwidth]{figuras/cad_isometrica.png}\hfill
+\includegraphics[width=0.5\columnwidth]{figuras/cad_lateral.png}
+\caption{Modelo CAD del plotter: vista isom\'etrica (izq.) y lateral (der.).}
+\label{fig:cad}
+\end{figure}
+ 
 
-donde $s_1=\sin q_1$, $s_{12}=\sin(q_1+q_2)$, y análogamente para los cosenos.
-El Jacobiano es singular ($\det J_v = 0$) cuando $q_2 = 0^\circ$ o
-$q_2 = 180^\circ$, es decir, con el brazo totalmente extendido o recogido.
-
-La cinemática inversa de posición resuelve $p_e(q) = p_{obj}$. Linealizando
-alrededor de la configuración actual se obtiene $J_v\,\Delta q = e$ con
-$e = p_{obj} - p_e(q)$, y el método del Jacobiano itera
-
-\begin{equation}
-q_{k+1} = q_k + J_v^{+}(q_k)\,\bigl(p_{obj} - p_e(q_k)\bigr),
-\label{eq:newton}
-\end{equation}
-
-con $J_v^{+}$ la pseudoinversa de Moore--Penrose. Cerca de una singularidad se
-usa la solución amortiguada de Levenberg--Marquardt
-$J_v^{+} = (J_v J_v^{T} + \lambda^2 I)^{-1} J_v^{T}$. La función
-\texttt{ikine(robot,T,q\_inicial)} implementa \eqref{eq:newton}; para una
-trayectoria cartesiana encadena la solución de cada punto como semilla del
-siguiente.
-
-Para 2 GdL con tarea de posición en el plano el sistema es cuadrado
-($J_v \in \mathbb{R}^{2\times 2}$): no hay redundancia y el método converge a la
-solución determinada por la semilla. Las \emph{dos} configuraciones del mismo
-punto (codo arriba y codo abajo) corresponden a los dos signos de $q_2$ y se
-obtienen con semillas de distinto signo. Como referencia, la forma cerrada es
-
-\begin{equation}
-\cos q_2 = \frac{x^2 + y^2 - L_1^2 - L_2^2}{2 L_1 L_2},
-\qquad
-q_1 = \operatorname{atan2}(y,x) - \operatorname{atan2}\!\bigl(L_2\sin q_2,\; L_1 + L_2\cos q_2\bigr).
-\label{eq:ik_cf}
-\end{equation}
-
-Las opciones de \texttt{ikine()} son una tolerancia de $10^{-10}$ m, hasta 200
-iteraciones, amortiguamiento $\lambda = 0$ (se activa solo cerca de
-singularidades) y un paso máximo de $0.5$ rad por iteración.
-
-\subsection{Planeación de trayectorias}
-\label{sec:tray}
-
-La figura a dibujar es el triángulo de Reuleaux de ancho $w = 0.10$ m centrado en
-$(0, 0.20)$ m. Se discretiza el contorno en puntos de paso y se interpola cada
-coordenada con un spline cúbico,
-
-\begin{equation}
-r(t) = \begin{bmatrix} x(t) \\ y(t) \end{bmatrix},
-\qquad r(t_k) = r_k, \qquad t_k \propto \text{longitud de arco},
-\label{eq:spline}
-\end{equation}
-
-de modo que $r(t)$ es de clase $C^2$ y la velocidad es continua ($C^1$). Para
-evitar discontinuidades de curvatura en los tres vértices del triángulo, el
-recorrido se divide en tres segmentos con un reescalado temporal suave
-(\textit{smoothstep}) que anula la velocidad cartesiana en cada vértice. Las
-trayectorias articulares se obtienen por cinemática inversa punto a punto y sus
-derivadas con el Jacobiano:
-
-\begin{equation}
-\dot q = J_v^{-1}\,\dot r, \qquad
-\ddot q = J_v^{-1}\bigl(\ddot r - \dot J_v\,\dot q\bigr),
-\label{eq:qdot}
-\end{equation}
-
-donde $\dot J_v$ se aproxima por diferencias finitas centrales. El procedimiento
-(muestreo a $100$ Hz, $T = 20$ s) se implementa en
-\texttt{trayectoria\_test.m}.
 
 \section{Resultados}
 
 \subsection{Cinemática directa}
 
-La cinemática directa se evaluó en $q = [60^\circ, -50^\circ]$ y se comparó con
-la solución analítica (\eqref{eq:fk}) y con \texttt{SerialLink.fkine} del
-Robotics Toolbox. La tabla \ref{tab:fk_val} resume el resultado: la posición
-calculada coincide con la analítica y con el toolbox con un error máximo de
-$2.8\times10^{-17}$ m. Además, el producto numérico de las matrices
-${}^{0}_{1}T\,{}^{1}_{2}T$ coincide exactamente con
-\texttt{forward\_kinematics}, lo que valida la implementación.
-
-\begin{table}[H]
-    \centering
-    \caption{Validación de la cinemática directa en $q = [60^\circ, -50^\circ]$.}
-    \label{tab:fk_val}
-    \begin{tabular}{lccc}
-    \toprule
-    Método & $x$ [m] & $y$ [m] & $z$ [m] \\
-    \midrule
-    Implementación propia & 0.19848078 & 0.19056990 & 0 \\
-    Solución analítica    & 0.19848078 & 0.19056990 & 0 \\
-    \texttt{SerialLink.fkine()} & 0.19848078 & 0.19056990 & 0 \\
-    \bottomrule
-    \end{tabular}
-\end{table}
-
-La figura \ref{fig:cin_dir} muestra el esquema del brazo en esa configuración,
-con los marcos de Denavit-Hartenberg y el volumen de trabajo: una corona con
-$R_{min} = L_1 - L_2 = 0.1$ m y $R_{max} = L_1 + L_2 = 0.3$ m que contiene al
-triángulo de Reuleaux (en azul).
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.46\textwidth]{figuras/cinematica_directa_esquema.eps}
-    \caption{Cinemática directa: marcos DH, brazo en $q = [60^\circ, -50^\circ]$
-    y volumen de trabajo.}
-    \label{fig:cin_dir}
-\end{figure}
+La cinemática directa se implementó en \texttt{forward\_kinematics(DH,q)} sobre
+los marcos de la figura~\ref{fig:marcos} y se validó en $q=[60^\circ,-50^\circ]$:
+coincide con la solución analítica y con \texttt{SerialLink.fkine} del Robotics
+Toolbox con un error máximo de $2{,}8\times10^{-17}$~m. El volumen de trabajo es
+una corona con $R_{min}=L_1-L_2=0{,}1$~m y $R_{max}=L_1+L_2=0{,}3$~m que
+contiene al triángulo de Reuleaux.
 
 \subsection{Cinemática inversa}
 
-El Jacobiano se verificó en $q = [30^\circ, -70^\circ]$: coincide exactamente
-con la forma analítica \eqref{eq:jac} y con el cálculo por diferencias finitas
-con un error de $1.5\times10^{-10}$; su determinante $\det J_v = -0.018794$
-coincide con $L_1 L_2 \sin q_2$.
+Para el brazo plano $\dot{\mathbf p}_e=\mathbf J_v(q)\,\dot{\mathbf q}$, con
+$\mathbf J_v$ el Jacobiano lineal y $\det\mathbf J_v=L_1L_2\sin q_2$ (singular
+en $q_2=0^\circ$ o $180^\circ$). La inversa itera
+$\mathbf q_{k+1}=\mathbf q_k+\mathbf J_v^{+}\bigl(\mathbf p_{obj}-\mathbf p_e(\mathbf q_k)\bigr)$
+(pseudoinversa de Moore--Penrose, amortiguada cerca de singularidades). El
+Jacobiano se verificó en $q=[30^\circ,-70^\circ]$, donde
+$\det\mathbf J_v=-0{,}018794=L_1L_2\sin q_2$. Para
+$\mathbf p_{obj}=[0{,}08;\,0{,}20]$~m la forma cerrada da las ramas
+A $q=[40{,}7^\circ,\,95{,}2^\circ]$ y B $q=[95{,}7^\circ,\,-95{,}2^\circ]$;
+\texttt{ikine} recupera \emph{ambas} según la semilla con error de posición
+$<3\times10^{-11}$~m (figura~\ref{fig:ik_ramas}). El índice de manipulabilidad
+$w=L_1L_2|\sin q_2|$ es máximo en $r=\sqrt{L_1^2+L_2^2}=0{,}2236$~m y tiende a
+cero en los límites $r=0{,}1$ y $0{,}3$~m (figura~\ref{fig:ik_sing}).
 
-Para el punto objetivo $p_{obj} = [0.08,\,0.20]$ m (radio $0.2154$ m) la forma
-cerrada \eqref{eq:ik_cf} da las dos configuraciones: rama A
-$q = [40.7^\circ, 95.2^\circ]$ y rama B $q = [95.7^\circ, -95.2^\circ]$
-(figura \ref{fig:ik_ramas}). La cinemática inversa iterativa \texttt{ikine()}
-recupera \emph{ambas} ramas según la semilla, con error de posición inferior a
-$3\times10^{-11}$ m y convergencia en 7--10 iteraciones (tabla
-\ref{tab:ik_res}). La posición recuperada coincide con la forma cerrada y con
-\texttt{SerialLink.fkine} con error menor que $2\times10^{-10}$, y el
-\texttt{SerialLink.ikine} del toolbox devuelve la misma rama A.
-
-\begin{table}[H]
+\begin{figure}[!t]
+\centering
+\begin{subfigure}[b]{0.38\columnwidth}
     \centering
-    \caption{Cinemática inversa iterativa para $p_{obj} = [0.08, 0.20]$ m.}
-    \label{tab:ik_res}
-    \begin{tabular}{ccccc}
-    \toprule
-    Semilla $q$ [$^\circ$] & $q$ resultante [$^\circ$] & Rama & Iter. & Error [m] \\
-    \midrule
-    $[10,\,10]$   & $[40.66,\,95.16]$  & A & 9  & $2.6\times10^{-11}$ \\
-    $[10,\,-10]$  & $[95.74,\,-95.16]$ & B & 10 & $1.3\times10^{-15}$ \\
-    $[0,\,0]$     & $[40.66,\,95.16]$  & A & 9  & $1.6\times10^{-11}$ \\
-    $[90,\,90]$   & $[40.66,\,95.16]$  & A & 7  & $2.2\times10^{-15}$ \\
-    \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.44\textwidth]{figuras/cinematica_inversa_ramas.eps}
-    \caption{Cinemática inversa: las dos configuraciones (codo arriba / codo
-    abajo) que llevan el efector final al mismo punto objetivo.}
+    \includegraphics[width=\textwidth]{figuras/ik_ramas.eps}
+    \caption{Ramas A y B (codo arriba/abajo) al mismo punto.}
     \label{fig:ik_ramas}
-\end{figure}
-
-El índice de manipulabilidad $w(q) = \sqrt{\det(J_v J_v^{T})} = L_1 L_2 |\sin
-q_2|$ mide la cercanía a una singularidad y depende únicamente del radio $r$. La
-figura \ref{fig:ik_sing} muestra que $w$ es máximo ($= L_1 L_2$) en
-$r = \sqrt{L_1^2 + L_2^2} = 0.2236$ m y tiende a cero en los límites
-$r = 0.1$ y $r = 0.3$ m. El triángulo de Reuleaux (banda resaltada) se ubica en
-la zona de buena manipulabilidad, alejado de las configuraciones singulares.
-
-\begin{figure}[H]
+\end{subfigure}\hfill
+\begin{subfigure}[b]{0.38\columnwidth}
     \centering
-    \includegraphics[width=0.46\textwidth]{figuras/cinematica_inversa_singularidad.eps}
-    \caption{Manipulabilidad $|\det J_v|$ frente al radio del efector final;
-    la banda naranja marca el rango radial ocupado por el triángulo de Reuleaux.}
+    \includegraphics[width=\textwidth]{figuras/ik_singularidad.eps}
+    \caption{Manipulabilidad $|\det\mathbf J_v|$ vs.\ radio $r$.}
     \label{fig:ik_sing}
+\end{subfigure}
+\caption{Resultados de la cinemática inversa.}
 \end{figure}
 
 \subsection{Planeación de trayectorias}
 
-El contorno se discretizó en $50$ puntos de paso y se muestreó a $\Delta t =
-0.01$ s ($2001$ muestras). La cinemática inversa convergió en los $2001$ puntos
-con un error máximo de posición de $1.0\times10^{-10}$ m, y la posición
-reconstruida por cinemática directa coincide con $r(t)$ con ese mismo orden de
-error. La figura \ref{fig:tray_cart} muestra las componentes $x(t)$ y $y(t)$ y el
-trazado en el plano; la figura \ref{fig:tray_art} presenta las trayectorias
-articulares $q(t)$, $\dot q(t)$ y $\ddot q(t)$ obtenidas por cinemática inversa;
-la figura \ref{fig:tray_cad} presenta además la simulación con el modelo CAD real
-del robot ejecutando el trazado.
+Se trazó el triángulo de Reuleaux ($w=0{,}10$~m, centro $(0;\,0{,}20)$~m),
+discretizado en $50$ puntos e interpolado con splines cúbicos; un reescalado
+temporal suave anula la velocidad cartesiana en los tres vértices. Con muestreo
+$\Delta t=0{,}01$~s ($2001$ puntos) la inversa convergió en todos los puntos con
+error $<1\times10^{-10}$~m. Las figuras~\ref{fig:tray_cart} y
+\ref{fig:tray_art} muestran las trayectorias cartesiana y articular; las
+velocidades máximas ($0{,}15$ y $0{,}21$~rad/s) quedan por debajo del límite de
+los servos S3003 ($5{,}5$~rad/s). La figura~\ref{fig:tray_cad} presenta la
+simulación con el modelo CAD real.
 
-La tabla \ref{tab:tray_lim} resume los máximos articulares. Las velocidades
-máximas ($0.15$ y $0.21$ rad/s) quedan holgadamente por debajo del límite de los
-servos Futaba S3003 ($5.5$ rad/s), y la velocidad cartesiana tiende a cero en los
-tres vértices, como exige el requerimiento de continuidad.
-
-\begin{table}[H]
+\begin{figure}[!t]
+\centering
+\begin{subfigure}[b]{0.38\columnwidth}
     \centering
-    \caption{Máximos articulares de la trayectoria del triángulo de Reuleaux.}
-    \label{tab:tray_lim}
-    \begin{tabular}{lccc}
-    \toprule
-    Articulación & máx $|q|$ [rad] & máx $|\dot q|$ [rad/s] & máx $|\ddot q|$ [rad/s$^2$] \\
-    \midrule
-    1 & 1.333 & 0.150 & 0.102 \\
-    2 & 2.250 & 0.206 & 0.413 \\
-    \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.60\textwidth]{figuras/trayectoria_cartesiana.eps}
-    \caption{Trayectoria cartesiana: componentes $x(t)$ y $y(t)$ y trazado
-    interpolado del triángulo de Reuleaux en el plano.}
+    \includegraphics[width=\textwidth]{figuras/trayectoria_cartesiana.eps}
+    \caption{Trayectoria cartesiana $x(t)$, $y(t)$ y trazado.}
     \label{fig:tray_cart}
-\end{figure}
-
-\begin{figure}[H]
+\end{subfigure}\hfill
+\begin{subfigure}[b]{0.38\columnwidth}
     \centering
-    \includegraphics[width=0.46\textwidth]{figuras/trayectoria_articular.eps}
-    \caption{Trayectorias articulares por cinemática inversa: posición,
-    velocidad y aceleración.}
+    \includegraphics[width=\textwidth]{figuras/trayectoria_articular.eps}
+    \caption{Trayectorias articulares $q(t)$, $\dot q(t)$, $\ddot q(t)$.}
     \label{fig:tray_art}
+\end{subfigure}
+\caption{Resultados de la planeación de trayectorias.}
 \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.62\textwidth]{figuras/trayectoria_cad.eps}
-    \caption{Simulación con el modelo CAD real (mallas de SolidWorks) del robot
-    ejecutando el trazado del triángulo de Reuleaux sobre el papel.}
-    \label{fig:tray_cad}
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.34\columnwidth]{figuras/trayectoria_cad.eps}
+\caption{Simulación con el modelo CAD real ejecutando el trazado.}
+\label{fig:tray_cad}
 \end{figure}
 
 \section{Conclusiones}
 
+El modelo cinemático quedó validado: la cinemática directa coincide con la
+analítica y con el Robotics Toolbox (error $\sim10^{-17}$~m), y la inversa por el
+Jacobiano recupera ambas configuraciones con error $<10^{-10}$~m, lejos de las
+singularidades ($q_2 = 0^\circ,\,180^\circ$).
+
+La planeación genera perfiles articulares $C^1$ con velocidad nula en los
+vértices y convergencia en los $2001$ puntos; las velocidades máximas
+($0{,}15$ y $0{,}21$~rad/s) quedan bajo el límite del servo ($5{,}5$~rad/s).
 
 \bibliographystyle{ieeetr} % Define el estilo de formato (puedes cambiarlo por plain, unsrt, etc.)
 \bibliography{referencias} % Llama a tu archivo .bib (no incluyas la extensión .bib aquí)
