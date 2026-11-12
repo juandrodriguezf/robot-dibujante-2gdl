@@ -65,12 +65,23 @@ main
 las mallas CAD. Las figuras vectoriales se exportan a `docs/informe-1/figuras/`
 y el video/GIF de la simulación a `docs/media/`.
 
+Para la Parte 2:
+
+```matlab
+main2
+```
+
+`main2.m` ejecuta la planeación de trayectorias (Punto 7, como insumo) y la
+dinámica inversa (Punto 8). El resumen de torques por articulación se imprime
+en consola. La validación cruzada contra el Robotics Toolbox se ejecuta con
+`matlab/dinamica/validar_dinamica.m`.
+
 ## Estado
 
 | Entregable | Puntos | Estado |
 |---|---|---|
 | Informe 1 (Semana 10) | 1-7 | Completo |
-| Informe 2 (Semana 13) | 8-11 | Pendiente |
+| Informe 2 (Semana 13) | 8-11 | En progreso (P8) |
 | Informe final (Semana 16) | 12-14 | Pendiente |
 
 ## Autores
