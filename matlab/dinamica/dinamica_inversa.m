@@ -5,6 +5,11 @@
 %   cada articulacion, el maximo absoluto, el pico positivo y el pico
 %   negativo del par requerido.
 %
+%   Los pares resultan del orden de mN·m: las articulaciones giran sobre ejes
+%   verticales, asi que la gravedad y la fuerza normal del lapiz (ambas en z)
+%   no generan par; solo quedan los terminos inerciales y de Coriolis de
+%   eslabones muy livianos.
+%
 %   Requiere que esten definidas en el workspace:
 %       DH, PARAM   (plotter_param)
 %       q, qd, qdd  (trayectoria_test)
@@ -56,11 +61,11 @@ fprintf('=======================================================\n');
 
 for col = 1:size(tau, 2)
     fprintf('Articulacion %d:\n', col);
-    fprintf('  - Max. absoluto (|Torque|): %8.4f N·m  (en el punto %d de %d)\n', ...
-        max_abs_tau(col), idx_abs(col), size(tau, 1));
-    fprintf('  - Pico positivo (+Torque):   %8.4f N·m  (en el punto %d)\n', ...
-        max_pos_tau(col), idx_pos(col));
-    fprintf('  - Pico negativo (-Torque):   %8.4f N·m  (en el punto %d)\n', ...
-        min_neg_tau(col), idx_neg(col));
+    fprintf('  - Max. absoluto (|Torque|): %8.3f mN·m  (en el punto %d de %d)\n', ...
+        1e3*max_abs_tau(col), idx_abs(col), size(tau, 1));
+    fprintf('  - Pico positivo (+Torque):   %8.3f mN·m  (en el punto %d)\n', ...
+        1e3*max_pos_tau(col), idx_pos(col));
+    fprintf('  - Pico negativo (-Torque):   %8.3f mN·m  (en el punto %d)\n', ...
+        1e3*min_neg_tau(col), idx_neg(col));
     fprintf('-------------------------------------------------------\n');
 end
