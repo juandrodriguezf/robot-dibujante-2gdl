@@ -16,7 +16,6 @@ function [tau1, tau2] = carga_mecanica()
     addpath(fullfile(aqui, '..', 'dinamica'));
     addpath(fullfile(aqui, '..', 'trayectorias'));
     addpath(fullfile(aqui, '..', 'lib'));
-    addpath(fullfile(aqui, '..', 'cinematica'));
     addpath(fullfile(aqui, '..', 'params'));
     add_rvc_path();
 
