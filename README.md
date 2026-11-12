@@ -49,6 +49,7 @@ de trayectoria →  inversa     →     de articulador →   (manipulador) →  
 - **MATLAB** (R2026a) + [Robotics Toolbox for MATLAB](https://petercorke.com/toolboxes/robotics-toolbox/)
   (Peter Corke, LGPL). La ruta del toolbox se detecta automáticamente o se fija con la
   variable de entorno `RVC_ROOT`.
+- **Simulink** (bloques base). El modelo de P10 no requiere Simscape Electrical.
 - **SolidWorks** para el CAD (o cualquier visor de STEP/STL).
 - **Arduino IDE** para el firmware.
 
@@ -65,15 +66,35 @@ main
 las mallas CAD. Las figuras vectoriales se exportan a `docs/informe-1/figuras/`
 y el video/GIF de la simulación a `docs/media/`.
 
-Para la Parte 2:
+### Parte 2 (P8 y P10)
 
 ```matlab
 main2
 ```
 
-`main2.m` ejecuta la planeación de trayectorias (Punto 7, como insumo) y la
-dinámica inversa (Punto 8). El resumen de torques por articulación se imprime
-en consola. La validación cruzada contra el Robotics Toolbox se ejecuta con
+`main2.m` ejecuta:
+
+- **P7** – trayectorias (insumo).
+- **P8** – dinámica inversa y torques por articulación.
+- **P10** – modelo de motor DC de primer orden y sensores en Simulink, con la
+  carga mecánica de P8.
+
+El modelo de P10 está en `matlab/control/`:
+
+- `param_motor.m` – parámetros del S3003 (`Ke = Kt`, `R`, `J`; `L = B = 0`).
+- `param_sensores.m` – sensores de posición, corriente y velocidad.
+- `build_motor_model.m` + `motor_2gdl.slx` – planta y sensores con bloques
+  base (sin Simscape Electrical).
+- `carga_mecanica.m` – par de carga de P8 como series de tiempo.
+- `test_motor_model.m` – verificación contra el datasheet y figuras en
+  `docs/informe-2/figuras/`.
+
+Supuestos: el S3003 es un servo con lazo interno; para simulación se usa un
+motor DC equivalente de primer orden calibrado con el datasheet (`L` y `B`
+despreciadas, `J` estimada). En la parte experimental se usa el S3003 tal como
+se compró (PWM). El detalle está en `docs/informe-2/p10_notas.md`.
+
+La validación cruzada de P8 contra el Robotics Toolbox se ejecuta con
 `matlab/dinamica/validar_dinamica.m`.
 
 ## Estado
@@ -81,7 +102,7 @@ en consola. La validación cruzada contra el Robotics Toolbox se ejecuta con
 | Entregable | Puntos | Estado |
 |---|---|---|
 | Informe 1 (Semana 10) | 1-7 | Completo |
-| Informe 2 (Semana 13) | 8-11 | En progreso (P8) |
+| Informe 2 (Semana 13) | 8-11 | En progreso (P8, P10) |
 | Informe final (Semana 16) | 12-14 | Pendiente |
 
 ## Autores

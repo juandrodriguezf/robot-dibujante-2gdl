@@ -13,10 +13,6 @@
 %   Requiere: motor_2gdl.slx, param_motor.m, param_sensores.m,
 %             carga_mecanica.m.
 
-clear;
-clc;
-close all;
-
 aqui = fileparts(mfilename('fullpath'));
 addpath(aqui);
 
