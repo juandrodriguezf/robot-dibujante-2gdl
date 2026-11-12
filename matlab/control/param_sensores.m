@@ -24,7 +24,7 @@ function sens = param_sensores()
     sens.cur_gain   = 1;            % A/A
     sens.cur_offset = 0;            % A
     sens.cur_noise  = 0.002;        % A (desviacion estandar supuesta)
-    sens.cur_bw     = 100;          % Hz (ancho de banda supuesto)
+    sens.cur_bw     = 1000;         % Hz (ancho de banda supuesto, shunt/Hall rapido)
     sens.cur_min    = -1;           % A
     sens.cur_max    =  1;           % A
 
