@@ -21,11 +21,22 @@ respuesta al escalón de 30$^\circ$.
     \end{tabular}
 \end{table}
 
-El escalón de 30$^\circ$ presentó un sobreimpulso de 0,18\% en Joint1 y 0\% en
+El escalón de 30$^\circ$ presentó un sobreimpulso de hasta 0,18\% en Joint1 y 0\% en
 Joint2, con tiempos de establecimiento de 111 y 110~ms y errores finales de
-0,22$^\circ$ y 0,20$^\circ$. La prealimentación redujo el error RMS entre 44\% y
-61\%. La robustez ante variaciones de $J$ entre $0{,}5J$ y $2J$ mantuvo el
-sobreimpulso por debajo de 2,2\%.
+0,22$^\circ$ y 0,20$^\circ$. La tensión satura solo durante el escalón
+($|V|_{max}=6$~V e $|i|_{max}\approx0{,}369$~A); en la trayectoria los máximos
+son 0,515/0,531~V y 0,033/0,034~A, por lo que el seguimiento ocurre en régimen
+lineal. La prealimentación redujo el error RMS entre 44\% y 61\%, porque
+$K_{ff}\dot\theta_{ref}$ aporta la tensión de velocidad y el término
+proporcional solo corrige el error restante.
+
+La robustez ante variaciones de $J$ entre $0{,}5J$ y $2J$ mantuvo el
+sobreimpulso entre 0,188\% y 2,180\%, con tiempos de establecimiento de
+0,109--0,136~s; la mayor sensibilidad aparece al duplicar $J$, pero el lazo
+permanece estable. El error RMS de 0,094$^\circ$ y 0,091$^\circ$ y los errores
+finales de 0,22$^\circ$ y 0,20$^\circ$ quedan por debajo de la cuantización de
+0,5$^\circ$ del sensor, de modo que la exactitud final está limitada por la
+instrumentación y no por el lazo de control.
 
 \begin{figure}[H]
     \centering

@@ -61,12 +61,10 @@ addpath(genpath('matlab'));
 main
 ```
 
-`main.m` ejecuta la cinemática directa (Punto 5), la cinemática inversa
-(Punto 6), la planeación de trayectorias (Punto 7) y la simulación animada con
-las mallas CAD. Las figuras vectoriales se exportan a `docs/informe-1/figuras/`
-y el video/GIF de la simulación a `docs/media/`.
+`main.m` ejecuta la Parte 2 (P8-P11), usando la trayectoria de P7 como insumo.
+Las figuras de P10 y P11 se generan en `docs/informe-2/figuras/`.
 
-### Parte 2 (P8 y P10)
+### Parte 2 (P8-P11)
 
 ```matlab
 main2
@@ -76,8 +74,12 @@ main2
 
 - **P7** – trayectorias (insumo).
 - **P8** – dinámica inversa y torques por articulación.
+- **P9** – selección de actuadores; se documenta en el informe
+  (`docs/informe-2/main.pdf`) y no requiere un script propio.
 - **P10** – modelo de motor DC de primer orden y sensores en Simulink, con la
   carga mecánica de P8.
+- **P11** – control de bajo nivel P + prealimentación de velocidad en
+  `motor_2gdl_ctrl.slx`.
 
 El modelo de P10 está en `matlab/control/`:
 
@@ -92,7 +94,7 @@ El modelo de P10 está en `matlab/control/`:
 Supuestos: el S3003 es un servo con lazo interno; para simulación se usa un
 motor DC equivalente de primer orden calibrado con el datasheet (`L` y `B`
 despreciadas, `J` estimada). En la parte experimental se usa el S3003 tal como
-se compró (PWM). El detalle está en `docs/informe-2/p10_notas.md`.
+se compró (PWM). El detalle está en `docs/informe-2/main.pdf`.
 
 La validación cruzada de P8 contra el Robotics Toolbox se ejecuta con
 `matlab/dinamica/validar_dinamica.m`.
@@ -102,7 +104,7 @@ La validación cruzada de P8 contra el Robotics Toolbox se ejecuta con
 | Entregable | Puntos | Estado |
 |---|---|---|
 | Informe 1 (Semana 10) | 1-7 | Completo |
-| Informe 2 (Semana 13) | 8-11 | En progreso (P8, P10) |
+| Informe 2 (Semana 13) | 8-11 | Completo (P8-P11) |
 | Informe final (Semana 16) | 12-14 | Pendiente |
 
 ## Autores
