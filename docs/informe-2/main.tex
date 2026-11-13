@@ -1,7 +1,7 @@
 \documentclass[10pt, letterpaper]{article}
 
 \usepackage[utf8]{inputenc}
-\usepackage[spanish]{babel}
+\usepackage[spanish, es-tabla]{babel}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -48,10 +48,41 @@
 \section{Métodos y Desarrollos}
 
 \subsection{Modelo de dinámica inversa}
-% P8: pendiente
+
+Tras haber resuelto los modelos de cinemática directa, inversa y las las trayectorias, la descripción geométrica del movimiento del manipulador queda completamente definida. En la presente entrega se aborda el modelo de dinámica inversa. Este proceso consiste en determinar los torques y fuerzas que deben ejercer los actuadores para que el efector final alcance y siga las posiciones, velocidades y aceleraciones deseadas a lo largo del recorrido, para posteriormente seleccionar los motores adecuados para las cargas del sistema. El flujo de variables que describen este procedimiento se ilustran en el diagrama de bloques de la figura \ref{fig:block_diagram}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figuras/block_diagram.jpg}
+    \caption{Diagrama de bloques de algoritmo completo para control de un manipulador}
+    \label{fig:block_diagram}
+\end{figure}
+
+Así, para resolver el modelo dinámico inverso del manipulador se implementó el algoritmo recursivo de Newton-Euler (RNE, por sus siglas en inglés). Este método es la línea base del estado del arte debido a su alta eficiencia computacional y a su escalabilidad a robots con más GdL. El algoritmo determina iterativamente las velocidades, aceleraciones y fuerzas propagadas en cada eslabón a partir de tres ecuaciones principales para cada variable, las cuales se muestran en (\ref{eq:rne})
+
+\begin{equation}
+    \label{eq:rne}
+    \begin{cases}
+    V_i = R^T P V_{i-1} + H \dot{q}_i \\
+    \dot{V}_i = R^T P \dot{V}_{i-1} + \tilde{W}_{i-1} R^T P V_{i-1} + H_i \ddot{q}_i + \tilde{W}_i H \dot{q}_i \\
+    \mathcal{F}_i = P^T R \mathcal{F}_{i+1} + I_i \dot{V}_i + [I_i \tilde{W}_i S_{i,cm} + \tilde{W}_i I_i] \cdot V_i
+    \end{cases}.
+\end{equation}
+
+Donde, para cada eslabón $i$, $V_i$ y $\dot{V}_i$ representan los vectores de velocidad y aceleración espacial en $\mathbb{R}^6$ (que agrupan las componentes angulares y lineales), mientras que $\dot{q}_i$ y $\ddot{q}_i$ corresponden a la velocidad y aceleración escalar de la articulación. Por su parte, $R$ y $P$ denotan los operadores espaciales de rotación y traslación entre sistemas de referencia consecutivos, y $H$ (o $H_i$) es el vector de proyección espacial que refleja el movimiento sobre el eje de actuación correspondiente. Asimismo, $\tilde{W}_i \in \mathbb{R}^{6 \times 6}$ es una matriz diagonal por bloques conformada por las matrices antisimétricas de las velocidades angulares del eslabón. Finalmente, $\mathcal{F}_i$ representa el vector de fuerza espacial (torsor de fuerzas y momentos) ejercido en la articulación, $\mathcal{I}_i$ corresponde al operador espacial de inercia del cuerpo rígido y $S_{i,cm}$ es el operador espacial de traslación desde el marco de referencia de la articulación hasta el centro de masa del eslabón.
+
+En este orden de ideas, el procedimiento recursivo finaliza extrayendo el torque o fuerza escalar ($\tau_i$) requerido por cada articulación para ejecutar el movimiento deseado. Dicha magnitud se obtiene proyectando el vector de fuerza espacial $\mathcal{F}_i \in \mathbb{R}^{6 \times 1}$ sobre el vector transpuesto del subespacio de movimiento articular $H_i^T \in \mathbb{R}^{1 \times 6}$, tal como se expresa en (\ref{eq:torque_rne}).
+
+\begin{equation}
+\label{eq:torque_rne}
+\tau_i = H_i^T \mathcal{F}_i
+\end{equation}
+
+Esta operación aísla la componente de esfuerzo efectiva sobre el eje de actuación —correspondiente al momento $\tau_z$ en articulaciones rotacionales o a la fuerza $f_z$ en prismáticas—, proporcionando los valores críticos de carga necesarios para dimensionar y validar la selección de los actuadores del manipulador.
+
+
 
 \subsection{Modelado de motores y sensores}
-
 El S3003 es un servo integrado: incluye motor, reductora, potenciómetro y
 controlador analógico. El lazo de posición ya viene cerrado y el servo solo
 recibe PWM; por eso, para simulación se adopta un motor DC equivalente de primer
@@ -82,9 +113,11 @@ El modelo resuelve las ecuaciones
     \dot{\theta} &= \omega, \label{eq:cinematica}
 \end{align}
 donde $V$ es la tensión de entrada, $i$ la corriente, $\omega$ la velocidad y
-$\theta$ la posición del eje de salida. La inductancia $L$ y el amortiguamiento
-$B$ se desprecian para obtener el modelo de primer orden; $J$ se estima a partir
-de un valor típico de servo pequeño. Los parámetros se resumen en la tabla
+$\theta$ la posición del eje de salida. La corriente se obtiene con
+\eqref{eq:corriente}, la dinámica mecánica con \eqref{eq:mecanica} y la posición
+integrando \eqref{eq:cinematica}. La inductancia $L$ y el amortiguamiento $B$ se
+desprecian para obtener el modelo de primer orden; $J$ se estima a partir de un
+valor típico de servo pequeño. Los parámetros se resumen en la tabla
 \ref{tab:parametros}.
 
 \begin{table}[H]
@@ -94,22 +127,25 @@ de un valor típico de servo pequeño. Los parámetros se resumen en la tabla
     \small
     \begin{tabular}{lcc}
         \toprule
-        Parámetro & Valor & Fuente \\
+        Parámetro & Notación & Valor [Unidad] \\
         \midrule
-        $K_e = K_t$ & $1{,}0886$ V$\cdot$s/rad $=$ N$\cdot$m/A & Datasheet \\
-        $R$ & $16{,}245$ $\Omega$ & Datasheet \\
-        $J$ & $3\times10^{-4}$ kg$\cdot$m$^2$ & Estimada \\
-        $L$ & $0$ & Despreciada \\
-        $B$ & $0$ & Despreciada \\
-        $V_{max}$ & $6$ V & Datasheet \\
-        $\omega_{nl}$ & $5{,}5116$ rad/s & Datasheet \\
-        $\tau_{stall}$ & $0{,}4021$ N$\cdot$m & Datasheet \\
-        $i_{stall}$ & $0{,}3693$ A & Derivada \\
-        $K = 1/K_e$ & $0{,}9186$ rad/s/V & Derivada \\
-        $\tau_m = JR/(K_tK_e)$ & $4{,}11$ ms & Derivada \\
+        Constante de fuerza y par & $K_e = K_t$ & $1{,}0886$ V$\cdot$s/rad $=$ N$\cdot$m/A \\
+        Resistencia & $R$ & $16{,}245$ $\Omega$ \\
+        Inercia & $J$ & $3\times10^{-4}$ kg$\cdot$m$^2$ \\
+        Inductancia & $L$ & $0$ H \\
+        Amortiguamiento & $B$ & $0$ N$\cdot$m$\cdot$s/rad \\
+        Tensión máxima & $V_{max}$ & $6$ V \\
+        Velocidad sin carga & $\omega_{nl}$ & $5{,}5116$ rad/s \\
+        Par de bloqueo & $\tau_{stall}$ & $0{,}4021$ N$\cdot$m \\
+        Corriente de bloqueo & $i_{stall}$ & $0{,}3693$ A \\
+        Constante de velocidad & $K = 1/K_e$ & $0{,}9186$ rad/s/V \\
+        Constante de tiempo & $\tau_m = JR/(K_tK_e)$ & $4{,}11$ ms \\
         \bottomrule
     \end{tabular}
 \end{table}
+
+Los valores de $K_e$, $R$, $V_{max}$, $\omega_{nl}$ y $\tau_{stall}$ provienen
+del datasheet; $J$ es estimada y $L$, $B$ se desprecian.
 
 Los sensores se modelan de forma genérica, porque el S3003 no expone el
 potenciómetro ni la corriente del motor. La tabla \ref{tab:sensores} resume sus
@@ -136,13 +172,18 @@ series de tiempo \texttt{tau1} y \texttt{tau2}, calculadas con
 \texttt{carga\_mecanica.m}; el par máximo es $0{,}177$~mN$\cdot$m y su efecto en
 la velocidad es $0{,}0013$~rad/s ($0{,}024\%$).
 
-\paragraph{Verificación del modelo.}
-La tabla \ref{tab:verificacion} resume la verificación del modelo de P10 contra
+\subsection{Control de bajo nivel}
+
+\section{Resultados}
+
+\subsection{Validación de modelo del motor}
+
+La tabla \ref{tab:verificacion} resume la verificación del modelo contra
 el datasheet.
 
 \begin{table}[H]
     \centering
-    \caption{Verificación del modelo de P10.}
+    \caption{Verificación del modelo.}
     \label{tab:verificacion}
     \small
     \begin{tabular}{lcc}
@@ -168,31 +209,77 @@ sensores.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.90\linewidth]{figuras/motor_escalon.eps}
-    \caption{Respuesta del modelo a escalones de 6 V y 3 V.}
-    \label{fig:escalon}
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figuras/motor_escalon.eps}
+        \caption{Respuesta a escalones de 6 V y 3 V.}
+        \label{fig:escalon}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figuras/motor_sensores.eps}
+        \caption{Señales reales y medidas de los sensores.}
+        \label{fig:sensores}
+    \end{subfigure}
+    \caption{Respuesta del modelo y señales de los sensores de posición, corriente y velocidad.}
 \end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.70\linewidth]{figuras/motor_sensores.eps}
-    \caption{Señales reales y medidas de los sensores de posición, corriente y velocidad.}
-    \label{fig:sensores}
-\end{figure}
-
-\subsection{Control de bajo nivel}
-% P11: pendiente
-
-\section{Resultados}
 
 \subsection{Resultados de dinámica inversa}
-% P8: pendiente
 
-\subsection{Simulación de control}
-% P11: pendiente
+Después de la implementación y la ejecución de RNE en MATLAB pudieron hallarse los valores de torque máximos necesarios, los cuales se muestran en la Tabla~\ref{tab:torques_maximos}.
+
+\begin{table}[H]
+    \centering
+    \caption{Torques máximos requeridos por articulación mediante RNE}
+    \label{tab:torques_maximos}
+    \begin{tabular}{c|c|c|c}
+    \hline
+    \textbf{Articulación} & \textbf{Máx. Absoluto ($\text{N}\cdot\text{m}$)} & \textbf{Pico Positivo ($\text{N}\cdot\text{m}$)} & \textbf{Pico Negativo ($\text{N}\cdot\text{m}$)} \\ \hline
+    1 & $1.6823 \times 10^{-5}$ (pto. 600) & $1.6823 \times 10^{-5}$ (pto. 600) & $-1.6385 \times 10^{-5}$ (pto. 1937) \\
+    2 & $9.0984 \times 10^{-6}$ (pto. 1935) & $4.9981 \times 10^{-6}$ (pto. 1899) & $-9.0984 \times 10^{-6}$ (pto. 1935) \\ \hline
+    \end{tabular}
+\end{table}
+
+La reducida magnitud de los torques obtenidos se justifica por dos factores físicos propios del diseño del sistema. En primer lugar, dado que el manipulador opera en un plano horizontal ($XY$) y sus articulaciones rotan alrededor del eje $Z$, el momento generado por la gravedad ($\boldsymbol{\tau}_g = \mathbf{r} \times m\mathbf{g}$) actúa exclusivamente sobre los ejes $X$ e $Y$, anulando cualquier carga gravitacional estática sobre los motores ($\tau_z = 0$). En segundo lugar, debido a la baja masa de los eslabones de balso ($L_1 = 20\text{ cm}$, $L_2 = 10\text{ cm}$) y del marcador ($30\text{ g}$), los momentos de inercia del conjunto son del orden de $10^{-4}\text{ kg}\cdot\text{m}^2$. En consecuencia, los actuadores únicamente deben vencer los esfuerzos puramente inerciales y de Coriolis ($\tau = I\ddot{q} + C\dot{q}$) asociados a una trayectoria suave, lo que explica que los pares requeridos se mantengan en el orden de magnitud obtenido.
+
+La anterior información nos permite seleccionar motores apropiados para la aplicación actual. Algunas opciones comerciales de motores prometedores para este caso se muestran en la Tabla  \ref{tab:seleccion_motores}.
+
+\begin{table}[H]
+    \centering
+    \caption{Comparativa de opciones comerciales de motores para los actuadores del robot.}
+    \label{tab:seleccion_motores}
+    \begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+    \hline
+    \textbf{Criterio} & \textbf{Servomotor (Futaba S3003)} \cite{futaba} & \textbf{Motor Paso a Paso (28BYJ-48)} \cite{stepper} & \textbf{Motor DC (Genérico con reductora)} \\ \hline
+    \textbf{Costo estimado} & Medio (\$18 900 COP) & Bajo (\$8 000 COP) & Bajo (\$5 000 COP) \\ \hline
+    \textbf{Tamaño y Peso} & $41\times20\times36\text{ mm}$, $37.2\text{ g}$ & Compacto, $\approx 35\text{ g}$ (sin driver) & Variable, ligero \\ \hline
+    \textbf{Torque máximo} & $4.1\text{ kg}\cdot\text{cm}$ ($6\text{ V}$) & $\approx 0.3\text{ kg}\cdot\text{cm}$ ($5\text{ V}$) & Variable según reductora \\ \hline
+    \textbf{Consumo (idle)} & $8\text{ mA}$ ($6.0\text{ V}$) & Mayor, requiere energía constante & Depende de la carga \\ \hline
+    \textbf{Velocidad} & $0.19\text{ s} / 60^\circ$ ($6.0\text{ V}$) & Lenta, limitada por frecuencia de pasos & Alta (requiere control PWM externo) \\ \hline
+    \textbf{Control nativo} & Sí (lazo cerrado interno) & Sí (lazo abierto) & No \\ \hline
+    \end{tabular}
+\end{table}
+
+De acuerdo con la comparativa de la Tabla \ref{tab:seleccion_motores}, el servomotor Futaba S3003 se consolida como la opción más adecuada. Aunque los motores paso a paso y los motores DC genéricos presentan ventajas en costo, el servomotor integra un controlador interno de posición y un potenciómetro que facilita un control nativo en lazo cerrado. A nivel de implementación computacional en el microcontrolador (ESP32-S3), esta característica es determinante: el control de un servomotor requiere únicamente enviar una señal PWM correspondiente al ángulo objetivo (por ejemplo, los valores de $q(t)$ calculados en la cinemática inversa), mientras que un motor paso a paso exigiría programar rutinas de conteo de pasos desde un origen referenciado, y un motor DC requeriría implementar desde cero tanto la instrumentación (encoders) como un controlador PID completo. Sumado a esto, el torque de $4.1\text{ kg}\cdot\text{cm}$ del Futaba S3003 sobrepasa holgadamente los requerimientos inerciales (del orden de $10^{-5}\text{ N}\cdot\text{m}$), garantizando fiabilidad durante la ejecución de la trayectoria.
 
 \section{Conclusiones}
-% Pendiente
+\begin{itemize}
+    \item El modelo equivalente de primer orden, replicado en \texttt{Joint1} y
+    \texttt{Joint2}, resultó adecuado para reproducir el comportamiento del
+    S3003 en los puntos de operación del datasheet: velocidad sin carga
+    ($5{,}5116$ rad/s), par de bloqueo ($0{,}4021$ N$\cdot$m) y constante de
+    tiempo ($4{,}3$ ms). La simplificación $L=B=0$ y la estimación de $J$ son
+    aceptables para simulación, aunque el modelo no captura la dinámica interna
+    del servo.
+    \item La caracterización de los sensores y de la carga mecánica mostró que
+    la posición y la corriente son adecuadas para realimentación (error máximo
+    de posición $0{,}28^\circ$ y error RMS de corriente $0{,}0168$ A), mientras
+    que la velocidad derivada requiere filtrado (RMS $0{,}754$ rad/s). La carga
+    mecánica tiene un efecto despreciable ($0{,}0013$ rad/s), consistente con el
+    sobredimensionamiento del actuador; el modelo es una herramienta válida para
+    análisis y dimensionamiento, con las limitaciones documentadas.
+\end{itemize}
 
 \bibliographystyle{ieeetr} % Define el estilo de formato (puedes cambiarlo por plain, unsrt, etc.)
 \bibliography{referencias} % Llama a tu archivo .bib (no incluyas la extensión .bib aquí)
