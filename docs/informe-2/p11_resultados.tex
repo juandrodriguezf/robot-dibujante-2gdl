@@ -1,24 +1,35 @@
-
 \subsection{Simulación de control}
-Cada articulación se probó de forma individual (modelo \texttt{motor\_2gdl\_ctrl.slx}).
 
-\textbf{Escalón de 30$^\circ$} (figura~\ref{fig:esc}): el sobreimpulso fue de 0,18\% en Joint1 y 0\% en Joint2; el tiempo de subida 10--90\% fue de 78 ms y el tiempo de establecimiento (banda del 2\%) de 111 ms y 110 ms, respectivamente. El error final fue $-0{,}22^\circ$ y $-0{,}20^\circ$, menor que la resolución de 0,5$^\circ$. Durante el recorrido la tensión satura en 6 V y la corriente pico es 0,369 A ($=i_{stall}$), como se espera del driver de un servo. Para escalones de 5$^\circ$, 15$^\circ$ y 60$^\circ$ el sobreimpulso se mantuvo en $\le 0{,}21\%$.
+Cada articulación se verificó de forma individual con el modelo
+\texttt{motor\_2gdl\_ctrl.slx}. La tabla~\ref{tab:ctrl} resume el seguimiento de
+la trayectoria de P7 con carga mecánica y la figura~\ref{fig:esc} muestra la
+respuesta al escalón de 30$^\circ$.
 
-\textbf{Recorrido del servo.} La trayectoria de P7 (Reuleaux de 10 cm, $T=20$ s) exige $q_1\in[43{,}7^\circ,76{,}4^\circ]$ y $q_2\in[65{,}8^\circ,128{,}9^\circ]$, mientras que el S3003 y su sensor se limitan a $\pm90^\circ$ (figura~\ref{fig:lim}): $q_2$ supera $90^\circ$ durante el 66\% del recorrido y, sin corrección, el sensor se satura y Joint2 se descontrola. Se resuelve montando el horn de cada servo con un desfase $q_{off}=[60^\circ,95^\circ]$ (centro del rango de cada articulación), de modo que $\theta_{servo}=q-q_{off}$ trabaja en $[-16^\circ,16^\circ]$ (Joint1) y $[-29^\circ,34^\circ]$ (Joint2).
+\begin{table}[H]
+    \centering
+    \caption{Seguimiento de la trayectoria de P7 por articulación ($T_s=10$~ms, carga incluida).}
+    \label{tab:ctrl}
+    \small
+    \begin{tabular}{lccccc}
+        \toprule
+        Articulación & RMS P [$^\circ$] & RMS P+FF [$^\circ$] &
+        Máx P+FF [$^\circ$] & $|V|_{max}$ [V] & $|i|_{max}$ [A] \\
+        \midrule
+        Joint1 & 0,168 & 0,094 & 0,252 & 0,515 & 0,033 \\
+        Joint2 & 0,234 & 0,091 & 0,263 & 0,531 & 0,034 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
-\textbf{Seguimiento de la trayectoria real de P7} (figura~\ref{fig:tray}): con carga mecánica de 0,177 mN$\cdot$m, los errores se resumen en la tabla~\ref{tab:ctrl}. La prealimentación reduce el error RMS entre 44\% y 61\%, y el error residual es del orden de la cuantización del sensor ($0{,}5^\circ/\sqrt{12}=0{,}14^\circ$). Las tensiones ($<0{,}6$ V) y corrientes ($<0{,}04$ A) son muy inferiores a los límites del motor. La tensión muestra una oscilación de $\pm0{,}25$ V producida por la cuantización de 0,5$^\circ$, que el servo real evita con su banda muerta.
+El escalón de 30$^\circ$ presentó un sobreimpulso de 0,18\% en Joint1 y 0\% en
+Joint2, con tiempos de establecimiento de 111 y 110~ms y errores finales de
+0,22$^\circ$ y 0,20$^\circ$. La prealimentación redujo el error RMS entre 44\% y
+61\%. La robustez ante variaciones de $J$ entre $0{,}5J$ y $2J$ mantuvo el
+sobreimpulso por debajo de 2,2\%.
 
-\begin{table}[h]\centering\caption{Seguimiento de la trayectoria de P7 por articulación ($T_s=10$ ms, carga mecánica incluida).}\label{tab:ctrl}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{lcccccc}\hline
-Articulación & RMS P [$^\circ$] & Máx P [$^\circ$] & RMS P+FF [$^\circ$] & Máx P+FF [$^\circ$] & $|V|_{max}$ [V] & $|i|_{max}$ [A]\\\hline
-Joint1 & 0,168 & 0,426 & 0,094 & 0,252 & 0,515 & 0,033\\
-Joint2 & 0,234 & 0,476 & 0,091 & 0,263 & 0,531 & 0,034\\\hline\end{tabular}}\end{table}
-
-\textbf{Robustez} (figura~\ref{fig:rob}): como $J$ es estimada, se varió entre $0{,}5J$ y $2J$; el sobreimpulso del escalón de 30$^\circ$ se mantiene por debajo de 2,2\% y el lazo permanece estable.
-
-\begin{figure}[h]\centering\includegraphics[width=.9\textwidth]{figuras/fig_limite_servo.png}\caption{Ángulo requerido por la trayectoria de P7 frente al límite de $\pm90^\circ$ del servo.}\label{fig:lim}\end{figure}
-\begin{figure}[h]\centering\includegraphics[width=.95\textwidth]{figuras/control_escalon.eps}\caption{Respuesta al escalón de 30$^\circ$ en una articulación.}\label{fig:esc}\end{figure}
-\begin{figure}[h]\centering\includegraphics[width=.95\textwidth]{figuras/control_trayectoria.eps}\caption{Seguimiento de la trayectoria de P7 en Joint1 y Joint2 (carga mecánica incluida).}\label{fig:tray}\end{figure}
-\begin{figure}[h]\centering\includegraphics[width=.9\textwidth]{figuras/control_robustez.eps}\caption{Robustez ante variación de $J$ (escalón de 30$^\circ$).}\label{fig:rob}\end{figure}
-\begin{figure}[h]\centering\includegraphics[width=.55\textwidth]{figuras/fig_bode.png}\caption{Bode del lazo abierto (con retardo $T_s/2$).}\label{fig:bode}\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.62\linewidth]{figuras/control_escalon.eps}
+    \caption{Respuesta al escalón de 30$^\circ$ en Joint1.}
+    \label{fig:esc}
+\end{figure}
