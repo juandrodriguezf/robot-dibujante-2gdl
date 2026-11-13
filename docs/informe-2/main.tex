@@ -172,7 +172,7 @@ series de tiempo \texttt{tau1} y \texttt{tau2}, calculadas con
 \texttt{carga\_mecanica.m}; el par máximo es $0{,}177$~mN$\cdot$m y su efecto en
 la velocidad es $0{,}0013$~rad/s ($0{,}024\%$).
 
-\subsection{Control de bajo nivel}
+\input{p11_control}
 
 \section{Resultados}
 
@@ -262,6 +262,8 @@ La anterior información nos permite seleccionar motores apropiados para la apli
 \end{table}
 
 De acuerdo con la comparativa de la Tabla \ref{tab:seleccion_motores}, el servomotor Futaba S3003 se consolida como la opción más adecuada. Aunque los motores paso a paso y los motores DC genéricos presentan ventajas en costo, el servomotor integra un controlador interno de posición y un potenciómetro que facilita un control nativo en lazo cerrado. A nivel de implementación computacional en el microcontrolador (ESP32-S3), esta característica es determinante: el control de un servomotor requiere únicamente enviar una señal PWM correspondiente al ángulo objetivo (por ejemplo, los valores de $q(t)$ calculados en la cinemática inversa), mientras que un motor paso a paso exigiría programar rutinas de conteo de pasos desde un origen referenciado, y un motor DC requeriría implementar desde cero tanto la instrumentación (encoders) como un controlador PID completo. Sumado a esto, el torque de $4.1\text{ kg}\cdot\text{cm}$ del Futaba S3003 sobrepasa holgadamente los requerimientos inerciales (del orden de $10^{-5}\text{ N}\cdot\text{m}$), garantizando fiabilidad durante la ejecución de la trayectoria.
+
+\input{p11_resultados}
 
 \section{Conclusiones}
 \begin{itemize}
