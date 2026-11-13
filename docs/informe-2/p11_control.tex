@@ -1,0 +1,39 @@
+\subsection{Control de bajo nivel}
+
+El S3003 ya incorpora un lazo interno de posición. Para simular el control de
+bajo nivel se replicó un controlador proporcional con prealimentación de
+velocidad en cada instancia (\texttt{Joint1} y \texttt{Joint2}). La ley
+implementada en \eqref{eq:p11_control}, evaluada con $T_s=10$~ms y la posición
+medida, es
+\begin{equation}
+\label{eq:p11_control}
+V_k=\mathrm{sat}_{\pm 6}\!\left[K_p\big(\theta_{ref,k}-\theta_{med,k}\big)
++K_{ff}\,\dot{\theta}_{ref,k}\right],
+\end{equation}
+con $K_p=40/K=43{,}5$~V/rad y $K_{ff}=K_e=1{,}0886$~V$\cdot$s/rad. El
+término $K_{ff}\dot\theta_{ref}$ entrega la tensión asociada a la fuerza
+contraelectromotriz, de modo que el término proporcional solo corrige el error
+de posición. Si se desprecia la carga y la saturación no actúa, al sustituir la
+ley de control en la planta de P10 el error $e=\theta_{ref}-\theta$ obedece a
+\eqref{eq:p11_lazo}:
+\begin{equation}
+\label{eq:p11_lazo}
+J\ddot e+\frac{K_tK_e}{R}\dot e+\frac{K_tK_p}{R}e=0,
+\qquad
+\omega_n=\sqrt{\frac{K_tK_p}{JR}},
+\qquad
+\zeta=\frac{K_tK_e/R}{2J\omega_n}.
+\end{equation}
+Con $J=3\times10^{-4}$~kg$\cdot$m$^2$, $R=16{,}245~\Omega$,
+$K_t=K_e=1{,}0886$ y $K_p=43{,}5$~V/rad se obtiene
+$\omega_n=98{,}6$~rad/s y $\zeta=1{,}23$; el lazo es estable y
+sobreamortiguado, por lo que el escalón no presenta oscilación apreciable.
+
+No se incluyó acción integral porque la cuantización de $0{,}5^\circ$
+produciría ciclos límite. La realimentación utiliza solo la posición medida;
+no se realimenta la velocidad, evitando amplificar el ruido de la derivada. El
+controlador se replica dentro de cada instancia \texttt{Joint1} y
+\texttt{Joint2} de \texttt{motor\_2gdl\_ctrl.slx}, evaluado cada
+$T_s=10$~ms con retenedor de orden cero. Para evitar la saturación de
+$\pm90^\circ$ del sensor, cada servo se monta con un desfase
+$q_{off}=[60^\circ,95^\circ]$, de modo que $\theta_{servo}=q-q_{off}$.

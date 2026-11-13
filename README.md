@@ -49,6 +49,7 @@ de trayectoria →  inversa     →     de articulador →   (manipulador) →  
 - **MATLAB** (R2026a) + [Robotics Toolbox for MATLAB](https://petercorke.com/toolboxes/robotics-toolbox/)
   (Peter Corke, LGPL). La ruta del toolbox se detecta automáticamente o se fija con la
   variable de entorno `RVC_ROOT`.
+- **Simulink** (bloques base). El modelo de P10 no requiere Simscape Electrical.
 - **SolidWorks** para el CAD (o cualquier visor de STEP/STL).
 - **Arduino IDE** para el firmware.
 
@@ -60,17 +61,50 @@ addpath(genpath('matlab'));
 main
 ```
 
-`main.m` ejecuta la cinemática directa (Punto 5), la cinemática inversa
-(Punto 6), la planeación de trayectorias (Punto 7) y la simulación animada con
-las mallas CAD. Las figuras vectoriales se exportan a `docs/informe-1/figuras/`
-y el video/GIF de la simulación a `docs/media/`.
+`main.m` ejecuta la Parte 2 (P8-P11), usando la trayectoria de P7 como insumo.
+Las figuras de P10 y P11 se generan en `docs/informe-2/figuras/`.
+
+### Parte 2 (P8-P11)
+
+```matlab
+main2
+```
+
+`main2.m` ejecuta:
+
+- **P7** – trayectorias (insumo).
+- **P8** – dinámica inversa y torques por articulación.
+- **P9** – selección de actuadores; se documenta en el informe
+  (`docs/informe-2/main.pdf`) y no requiere un script propio.
+- **P10** – modelo de motor DC de primer orden y sensores en Simulink, con la
+  carga mecánica de P8.
+- **P11** – control de bajo nivel P + prealimentación de velocidad en
+  `motor_2gdl_ctrl.slx`.
+
+El modelo de P10 está en `matlab/control/`:
+
+- `param_motor.m` – parámetros del S3003 (`Ke = Kt`, `R`, `J`; `L = B = 0`).
+- `param_sensores.m` – sensores de posición, corriente y velocidad.
+- `build_motor_model.m` + `motor_2gdl.slx` – planta y sensores con bloques
+  base (sin Simscape Electrical).
+- `carga_mecanica.m` – par de carga de P8 como series de tiempo.
+- `test_motor_model.m` – verificación contra el datasheet y figuras en
+  `docs/informe-2/figuras/`.
+
+Supuestos: el S3003 es un servo con lazo interno; para simulación se usa un
+motor DC equivalente de primer orden calibrado con el datasheet (`L` y `B`
+despreciadas, `J` estimada). En la parte experimental se usa el S3003 tal como
+se compró (PWM). El detalle está en `docs/informe-2/main.pdf`.
+
+La validación cruzada de P8 contra el Robotics Toolbox se ejecuta con
+`matlab/dinamica/validar_dinamica.m`.
 
 ## Estado
 
 | Entregable | Puntos | Estado |
 |---|---|---|
 | Informe 1 (Semana 10) | 1-7 | Completo |
-| Informe 2 (Semana 13) | 8-11 | Pendiente |
+| Informe 2 (Semana 13) | 8-11 | Completo (P8-P11) |
 | Informe final (Semana 16) | 12-14 | Pendiente |
 
 ## Autores
